@@ -1,4 +1,4 @@
-package raisetech.StudentManagement.data;
+package raisetech.StudentManagement.controller.converter;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

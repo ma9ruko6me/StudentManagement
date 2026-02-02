@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.controller.converter.StudentCourse;
 
 @Mapper
 public interface StudentRepository {

@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.controller.converter.StudentCourse;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
