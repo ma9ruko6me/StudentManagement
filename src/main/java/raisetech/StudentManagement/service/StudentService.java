@@ -25,9 +25,7 @@ public class StudentService  {
     return repository.searchCourses();
   }
 
-  public Student registerStudent (String name) {
-    Student student = new Student();
-    student.setName(name);
+  public Student registerStudent (Student student) {
 
     repository.registerStudent(student);
     return student;
