@@ -4,7 +4,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.controller.converter.StudentCourse;
+import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
@@ -25,9 +26,16 @@ public class StudentService  {
     return repository.searchCourses();
   }
 
-  public Student registerStudent (Student student) {
-
+  public Student registerStudent (StudentDetail studentDetail) {
+    Student student = studentDetail.getStudent();
     repository.registerStudent(student);
+
+    List<StudentCourse> courses = studentDetail.getStudentCourses();
+    for (StudentCourse course : courses) {
+      course.setStudentId(student.getId());
+      repository.registerStudentCourse(course);
+    }
     return student;
   }
+
 }

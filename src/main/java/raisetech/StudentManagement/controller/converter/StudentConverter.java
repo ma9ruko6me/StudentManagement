@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import raisetech.StudentManagement.data.Student;
+import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 
 @Component

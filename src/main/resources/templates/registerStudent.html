@@ -40,6 +40,10 @@
     <input type="text" id="remark" th:field="*{student.remark}" required/>
   </div>
   <div>
+    <label for="course">受講コース</label>
+    <input type="text" id="course" th:field="*{studentCourses[0].course}" required/>
+  </div>
+  <div>
     <button type="submit">登録</button>
   </div>
 </form>
