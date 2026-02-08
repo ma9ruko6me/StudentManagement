@@ -21,6 +21,9 @@ public interface StudentRepository {
   @Select("SELECT * FROM students_courses")
   List<StudentCourse> searchCourses();
 
+  @Select("SELECT * FROM students_courses WHERE student_id = #{id}")
+  List<StudentCourse> searchStudentCourses(int id);
+
   @Insert("INSERT INTO students (name,hurigana,nickname,age,email,area,gender,remark,is_deleted) VALUES (#{name},#{hurigana},#{nickname},#{age},#{email},#{area},#{gender},#{remark},0)")
   @Options(useGeneratedKeys = true,keyProperty = "id")
   void registerStudent(Student student);
@@ -31,4 +34,7 @@ public interface StudentRepository {
 
   @Update("UPDATE students SET  name = #{name},hurigana = #{hurigana},nickname = #{nickname},age = #{age},email = #{email},area = #{area},gender = #{gender},remark = #{remark} WHERE id = #{id}")
   void updateStudent(Student student);
+
+  @Update("UPDATE students_courses SET course = #{course},start_date = #{startDate},end_date = #{endDate} WHERE id = #{id}")
+  void updateStudentCourses(StudentCourse studentCourse);
 }

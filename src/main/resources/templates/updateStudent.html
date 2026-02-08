@@ -40,6 +40,21 @@
     <label for="remark">備考</label>
     <input type="text" id="remark" th:field="*{student.remark}"/>
   </div>
+  <div th:each="course, stat : *{studentCourses}">
+    <input type="hidden" th:name="|studentCourses[${stat.index}].id|" th:value="${course.id}" />
+    <div>
+      <label>コース</label>
+      <input type="text" th:name="|studentCourses[${stat.index}].course|" th:value="${course.course}" />
+    </div>
+    <div>
+      <label>開始日</label>
+      <input type="date" th:name="|studentCourses[${stat.index}].startDate|" th:value="${#temporals.format(course.startDate, 'yyyy-MM-dd')}" />
+    </div>
+    <div>
+      <label>終了日</label>
+      <input type="date" th:name="|studentCourses[${stat.index}].endDate|" th:value="${#temporals.format(course.endDate, 'yyyy-MM-dd')}" />
+    </div>
+  </div>
   <div>
     <button type="submit">登録</button>
   </div>
