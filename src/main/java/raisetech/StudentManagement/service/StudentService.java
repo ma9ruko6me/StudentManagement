@@ -52,9 +52,7 @@ public class StudentService  {
 
   //受講生情報の更新
   public void updateStudent (StudentDetail studentDetail) {
-    int id = studentDetail.getStudent().getId();
-    String name = studentDetail.getStudent().getName();
-    repository.updateStudent(name, id);
+    repository.updateStudent(studentDetail.getStudent());
   }
 
 }

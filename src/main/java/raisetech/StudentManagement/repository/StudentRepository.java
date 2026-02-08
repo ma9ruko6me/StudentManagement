@@ -29,6 +29,6 @@ public interface StudentRepository {
   @Options(useGeneratedKeys = true,keyProperty = "id")
   void registerStudentCourse(StudentCourse studentCourse);
 
-  @Update("UPDATE students SET  name = #{name} WHERE id = #{id}")
-  void updateStudent(String name, int id);
+  @Update("UPDATE students SET  name = #{name},hurigana = #{hurigana},nickname = #{nickname},age = #{age},email = #{email},area = #{area},gender = #{gender},remark = #{remark} WHERE id = #{id}")
+  void updateStudent(Student student);
 }
