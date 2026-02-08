@@ -57,7 +57,6 @@ public class StudentService {
     repository.updateStudent(studentDetail.getStudent());
 
     for (StudentCourse course : studentDetail.getStudentCourses()) {
-      course.setStudentId(studentDetail.getStudent().getId());
       repository.updateStudentCourses(course);
     }
   }
