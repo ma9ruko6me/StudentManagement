@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -27,4 +28,7 @@ public interface StudentRepository {
   @Insert("INSERT INTO students_courses (student_id,course,start_date,end_date) VALUES (#{studentId},#{course},#{startDate},#{endDate})")
   @Options(useGeneratedKeys = true,keyProperty = "id")
   void registerStudentCourse(StudentCourse studentCourse);
+
+  @Update("UPDATE students SET  name = #{name} WHERE id = #{id}")
+  void updateStudent(String name, int id);
 }

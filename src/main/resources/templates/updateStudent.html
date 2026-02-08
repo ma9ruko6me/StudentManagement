@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>受講生情報更新</title>
+</head>
+<body>
+<h1>受講生情報更新</h1>
+<form th:action="@{/updateStudent}" th:object="${studentDetail}" method="post">
+  <input type="hidden" th:field="*{student.id}">
+  <div>
+    <label for="name">名前</label>
+    <input type="text" id="name" th:field="*{student.name}" required/>
+  </div>
+  <div>
+    <button type="submit">登録</button>
+  </div>
+</form>
+</body>
+</html>

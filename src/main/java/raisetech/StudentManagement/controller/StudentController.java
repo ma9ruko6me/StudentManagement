@@ -41,6 +41,7 @@ public class StudentController {
     return service.searchStudentCourseList();
   }
 
+  //新規受講生の登録
   @GetMapping("/newStudent")
   public String newStudent (Model model) {
     model.addAttribute("studentDetail",new StudentDetail());
@@ -59,9 +60,16 @@ public class StudentController {
 
   }
 
+  //受講生情報の更新
   @GetMapping("/updateStudent/{id}")
   public String updateStudent(@PathVariable int id ,Model model) {
-    model.addAttribute("studentList",service.searchStudent(id));
-    return "studentList";
+    model.addAttribute("studentDetail",service.searchStudent(id));
+    return "updateStudent";
+  }
+
+  @PostMapping("/updateStudent")
+  public String updateStudent(@ModelAttribute StudentDetail studentDetail) {
+    service.updateStudent(studentDetail);
+    return "redirect:/studentList";
   }
 }

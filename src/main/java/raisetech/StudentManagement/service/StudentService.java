@@ -34,6 +34,7 @@ public class StudentService  {
     return repository.searchCourses();
   }
 
+  //新規受講生の登録
   @Transactional
   public Student registerStudent (StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
@@ -47,6 +48,13 @@ public class StudentService  {
       repository.registerStudentCourse(course);
     }
     return student;
+  }
+
+  //受講生情報の更新
+  public void updateStudent (StudentDetail studentDetail) {
+    int id = studentDetail.getStudent().getId();
+    String name = studentDetail.getStudent().getName();
+    repository.updateStudent(name, id);
   }
 
 }
