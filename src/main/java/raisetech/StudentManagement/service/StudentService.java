@@ -20,8 +20,14 @@ public class StudentService  {
     this.repository = repository;
   }
 
-  public List<Student> searchStudentList() {
+  public List<Student> searchStudentsList() {
     return repository.search();
+  }
+
+  public StudentDetail searchStudent(int id) {
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(repository.searchStudent(id));
+    return studentDetail;
   }
 
   public List<StudentCourse> searchStudentCourseList() {
