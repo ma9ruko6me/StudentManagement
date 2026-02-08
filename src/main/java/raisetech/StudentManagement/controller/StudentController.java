@@ -22,7 +22,7 @@ public class StudentController {
   private StudentConverter converter;
 
   @Autowired
-  public StudentController(StudentService service,StudentConverter converter) {
+  public StudentController(StudentService service, StudentConverter converter) {
     this.service = service;
     this.converter = converter;
   }
@@ -32,7 +32,7 @@ public class StudentController {
     List<Student> students = service.searchStudentsList();
     List<StudentCourse> studentCourses = service.searchStudentCourseList();
 
-    model.addAttribute("studentList",converter.convertStudentDetails(students, studentCourses));
+    model.addAttribute("studentList", converter.convertStudentDetails(students, studentCourses));
     return "studentList";
   }
 
@@ -43,8 +43,8 @@ public class StudentController {
 
   //新規受講生の登録
   @GetMapping("/newStudent")
-  public String newStudent (Model model) {
-    model.addAttribute("studentDetail",new StudentDetail());
+  public String newStudent(Model model) {
+    model.addAttribute("studentDetail", new StudentDetail());
     return "registerStudent";
   }
 
@@ -62,8 +62,8 @@ public class StudentController {
 
   //受講生情報の更新
   @GetMapping("/updateStudent/{id}")
-  public String updateStudent(@PathVariable int id ,Model model) {
-    model.addAttribute("studentDetail",service.searchStudent(id));
+  public String updateStudent(@PathVariable int id, Model model) {
+    model.addAttribute("studentDetail", service.searchStudent(id));
     return "updateStudent";
   }
 

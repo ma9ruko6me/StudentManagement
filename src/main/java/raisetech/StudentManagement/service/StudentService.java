@@ -12,7 +12,7 @@ import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
-public class StudentService  {
+public class StudentService {
 
   private StudentRepository repository;
 
@@ -38,7 +38,7 @@ public class StudentService  {
 
   //新規受講生の登録
   @Transactional
-  public Student registerStudent (StudentDetail studentDetail) {
+  public Student registerStudent(StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
     repository.registerStudent(student);
 
@@ -53,7 +53,7 @@ public class StudentService  {
   }
 
   //受講生情報の更新
-  public void updateStudent (StudentDetail studentDetail) {
+  public void updateStudent(StudentDetail studentDetail) {
     repository.updateStudent(studentDetail.getStudent());
 
     for (StudentCourse course : studentDetail.getStudentCourses()) {

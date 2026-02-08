@@ -25,11 +25,11 @@ public interface StudentRepository {
   List<StudentCourse> searchStudentCourses(int id);
 
   @Insert("INSERT INTO students (name,hurigana,nickname,age,email,area,gender,remark,is_deleted) VALUES (#{name},#{hurigana},#{nickname},#{age},#{email},#{area},#{gender},#{remark},0)")
-  @Options(useGeneratedKeys = true,keyProperty = "id")
+  @Options(useGeneratedKeys = true, keyProperty = "id")
   void registerStudent(Student student);
 
   @Insert("INSERT INTO students_courses (student_id,course,start_date,end_date) VALUES (#{studentId},#{course},#{startDate},#{endDate})")
-  @Options(useGeneratedKeys = true,keyProperty = "id")
+  @Options(useGeneratedKeys = true, keyProperty = "id")
   void registerStudentCourse(StudentCourse studentCourse);
 
   @Update("UPDATE students SET  name = #{name},hurigana = #{hurigana},nickname = #{nickname},age = #{age},email = #{email},area = #{area},gender = #{gender},remark = #{remark} WHERE id = #{id}")
