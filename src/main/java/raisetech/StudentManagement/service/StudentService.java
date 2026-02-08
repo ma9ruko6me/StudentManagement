@@ -53,6 +53,7 @@ public class StudentService {
   }
 
   //受講生情報の更新
+  @Transactional
   public void updateStudent(StudentDetail studentDetail) {
     repository.updateStudent(studentDetail.getStudent());
 
