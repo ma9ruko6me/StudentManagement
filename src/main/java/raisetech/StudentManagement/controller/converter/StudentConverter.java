@@ -16,25 +16,24 @@ import raisetech.StudentManagement.domain.StudentDetail;
 public class StudentConverter {
 
   /**
-   * 受講生に紐づく受講生コース情報をマッピングする。
-   * 受講生コース情報は受講生に対して複数存在するのでループを回して受講生詳細情報を組み立てる。
+   * 受講生に紐づく受講生コース情報をマッピングする。 受講生コース情報は受講生に対して複数存在するのでループを回して受講生詳細情報を組み立てる。
    *
-   * @param students　受講生一覧
-   * @param studentCourses　受講生コース情報のリスト
+   * @param studentList       受講生一覧
+   * @param studentCourseList 受講生コース情報のリスト
    * @return　受講生詳細情報のリスト
    */
-  public @NonNull List<StudentDetail> convertStudentDetails(List<Student> students,
-      List<StudentCourse> studentCourses) {
+  public @NonNull List<StudentDetail> convertStudentDetails(List<Student> studentList,
+      List<StudentCourse> studentCourseList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
-    students.forEach(student -> {
+    studentList.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
       studentDetail.setStudent(student);
 
-      List<StudentCourse> convertStudentCourses = studentCourses.stream()
+      List<StudentCourse> convertStudentCourseList = studentCourseList.stream()
           .filter(studentCourse -> student.getId() == studentCourse.getStudentId())
           .collect(Collectors.toList());
 
-      studentDetail.setStudentCourses(convertStudentCourses);
+      studentDetail.setStudentCourseList(convertStudentCourseList);
       studentDetails.add(studentDetail);
     });
     return studentDetails;
