@@ -47,7 +47,7 @@ public class StudentController {
    * @return　受講生詳細
    */
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable @NotBlank int id) {
+  public StudentDetail getStudent(@PathVariable int id) {
     return service.searchStudent(id);
   }
 
