@@ -1,78 +1,76 @@
 package raisetech.StudentManagement.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import raisetech.StudentManagement.controller.converter.StudentConverter;
-import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentCourse;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
-@Controller
+/**
+ * 受講生情報の検索や登録、更新などを行うREST APIとして実行されるControllerです。
+ */
+@RestController
+@Validated
 public class StudentController {
 
   private StudentService service;
-  private StudentConverter converter;
 
   @Autowired
-  public StudentController(StudentService service, StudentConverter converter) {
+  public StudentController(StudentService service) {
     this.service = service;
-    this.converter = converter;
   }
 
+  /**
+   * 受講生詳細の一覧検索です。 全件検索を行うので、条件指定は行いません。
+   *
+   * @return　受講生詳細一覧（全件）
+   */
   @GetMapping("/studentList")
-  public String getStudentList(Model model) {
-    List<Student> students = service.searchStudentsList();
-    List<StudentCourse> studentCourses = service.searchStudentCourseList();
-
-    model.addAttribute("studentList", converter.convertStudentDetails(students, studentCourses));
-    return "studentList";
+  public List<StudentDetail> getStudentList() {
+    return service.searchStudentList();
   }
 
-  @GetMapping("/studentCourseList")
-  public List<StudentCourse> getStudentCourseList() {
-    return service.searchStudentCourseList();
+  /**
+   * 受講生詳細の検索です。 IDに紐づく任意の受講生情報を取得します。
+   *
+   * @param id 受講生ID
+   * @return　受講生詳細
+   */
+  @GetMapping("/student/{id}")
+  public StudentDetail getStudent(@PathVariable @NotBlank int id) {
+    return service.searchStudent(id);
   }
 
-  //新規受講生の登録
-  @GetMapping("/newStudent")
-  public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
-    return "registerStudent";
-  }
-
+  /**
+   * 受講生詳細の登録を行います。
+   *
+   * @param studentDetail 受講生詳細
+   * @return　実行結果
+   */
   @PostMapping("/registerStudent")
-  public String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
-    if (result.hasErrors()) {
-      return "registerStudent";
-    }
-    Student student = studentDetail.getStudent();
-    service.registerStudent(studentDetail);
-
-    return "redirect:/studentList";
-
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
+    StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
+    return ResponseEntity.ok(responseStudentDetail);
   }
 
-  //受講生情報の更新
-  @GetMapping("/updateStudent/{id}")
-  public String updateStudent(@PathVariable int id, Model model) {
-    model.addAttribute("studentDetail", service.searchStudent(id));
-    return "updateStudent";
-  }
-
-  @PostMapping("/updateStudent")
-  public String updateStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
-    if (result.hasErrors()) {
-      return "updateStudent";
-    }
+  /**
+   * 受講生詳細の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
+   *
+   * @param studentDetail 受講生詳細
+   * @return　実行結果
+   */
+  @PutMapping("/updateStudent")
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
-    return "redirect:/studentList";
+    return ResponseEntity.ok("更新処理が成功しました。");
   }
 }
