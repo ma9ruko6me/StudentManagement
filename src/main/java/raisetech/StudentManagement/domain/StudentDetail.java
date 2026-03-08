@@ -1,8 +1,6 @@
 package raisetech.StudentManagement.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
