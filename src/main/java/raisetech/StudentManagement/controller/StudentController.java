@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 
 /**
@@ -46,7 +47,7 @@ public class StudentController {
    * @return　受講生詳細
    */
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable @NotBlank int id) {
+  public StudentDetail getStudent(@PathVariable int id) {
     return service.searchStudent(id);
   }
 
@@ -57,7 +58,8 @@ public class StudentController {
    * @return　実行結果
    */
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
+  public ResponseEntity<StudentDetail> registerStudent(
+      @RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
@@ -72,5 +74,10 @@ public class StudentController {
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  @GetMapping("/testException")
+  public List<StudentDetail> testException() throws TestException {
+    throw new TestException("これは例外を発生させるAPIです。");
   }
 }
