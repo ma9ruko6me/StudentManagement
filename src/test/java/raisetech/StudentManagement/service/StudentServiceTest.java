@@ -69,6 +69,28 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生詳細の単一検索_存在しないIDを入力されてもStudentDetailを返すこと (){
+    int id = 999;
+
+    when(repository.searchStudent(id)).thenReturn(null);
+    when(repository.searchStudentCourse(id)).thenReturn(null);
+
+    StudentDetail actual = sut.searchStudent(id);
+
+    assertNotNull(actual);
+    assertNull(actual.getStudent());
+    assertNull(actual.getStudentCourseList());
+  }
+
+  @Test
+  void 受講生詳細の単一検索_リポジトリが例外を投げた場合はそのまま伝播すること () {
+    int id = 999;
+    when(repository.searchStudent(id)).thenThrow(new RuntimeException());
+
+    assertThrows(RuntimeException.class, () -> sut.searchStudent(id));
+  }
+
+  @Test
   void 受講生詳細の登録_リポジトリの処理が適切に呼び出せていること () {
     Student student = new Student();
     StudentCourse studentCourse = new StudentCourse();
