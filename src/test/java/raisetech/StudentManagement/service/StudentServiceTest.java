@@ -73,7 +73,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の単一検索_存在しないIDを入力されてもStudentDetailを返すこと (){
+  void 受講生詳細の単一検索_StudentとStudentDetailがNullでもStudentDetailを返すこと (){
     int id = 999;
 
     when(repository.searchStudent(id)).thenReturn(null);
@@ -83,6 +83,32 @@ class StudentServiceTest {
 
     assertNotNull(actual);
     assertNull(actual.getStudent());
+    assertNull(actual.getStudentCourseList());
+  }
+
+  @Test
+  void 受講生詳細の単一検索_StudentがNullでもStudentDetailを返すこと (){
+    int id = 999;
+
+    when(repository.searchStudent(id)).thenReturn(null);
+    when(repository.searchStudentCourse(id)).thenReturn(new ArrayList<>());
+
+    StudentDetail actual = sut.searchStudent(id);
+
+    assertNotNull(actual);
+    assertNull(actual.getStudent());
+  }
+
+  @Test
+  void 受講生詳細の単一検索_StudentCourseListがNullでもStudentDetailを返すこと (){
+    int id = 999;
+
+    when(repository.searchStudent(id)).thenReturn(new Student());
+    when(repository.searchStudentCourse(id)).thenReturn(null);
+
+    StudentDetail actual = sut.searchStudent(id);
+
+    assertNotNull(actual);
     assertNull(actual.getStudentCourseList());
   }
 
@@ -113,19 +139,26 @@ class StudentServiceTest {
     student.setId(999);
     student.setName("名無し");
     StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId(999);
+    studentCourse.setCourse("AAA");
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
 
     ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
+    ArgumentCaptor<StudentCourse> studentCourseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
 
     sut.registerStudent(studentDetail);
 
     verify(repository).registerStudent(studentCaptor.capture());
+    verify(repository).registerStudentCourse(studentCourseCaptor.capture());
 
-    Student actual = studentCaptor.getValue();
+    Student actualStudent = studentCaptor.getValue();
+    StudentCourse actualStudentCourse = studentCourseCaptor.getValue();
 
-    assertEquals(999, actual.getId());
-    assertEquals("名無し", actual.getName());
+    assertEquals(999, actualStudent.getId());
+    assertEquals("名無し", actualStudent.getName());
+    assertEquals(999, actualStudentCourse.getId());
+    assertEquals("AAA", actualStudentCourse.getCourse());
   }
 
   @Test
@@ -147,18 +180,25 @@ class StudentServiceTest {
     student.setId(999);
     student.setName("名無し");
     StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId(999);
+    studentCourse.setCourse("AAA");
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
 
-    ArgumentCaptor<Student> Captor = ArgumentCaptor.forClass(Student.class);
+    ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
+    ArgumentCaptor<StudentCourse> studentCourseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
 
     sut.updateStudent(studentDetail);
 
-    verify(repository).updateStudent(Captor.capture());
+    verify(repository).updateStudent(studentCaptor.capture());
+    verify(repository).updateStudentCourse(studentCourseCaptor.capture());
 
-    Student actual = Captor.getValue();
+    Student actualStudent = studentCaptor.getValue();
+    StudentCourse actualStudentCourse = studentCourseCaptor.getValue();
 
-    assertEquals(999, actual.getId());
-    assertEquals("名無し", actual.getName());
+    assertEquals(999, actualStudent.getId());
+    assertEquals("名無し", actualStudent.getName());
+    assertEquals(999, actualStudentCourse.getId());
+    assertEquals("AAA", actualStudentCourse.getCourse());
   }
 }
