@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
@@ -37,14 +38,17 @@ class StudentServiceTest {
   void 受講生詳細の一覧検索_リポジトリとコンバーターの処理が適切に呼び出せていること () {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
+    List<StudentDetail> expected = new ArrayList<>();
     when(repository.search()).thenReturn(studentList);
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
+    when(converter.convertStudentDetails(studentList,studentCourseList)).thenReturn(expected);
 
-    sut.searchStudentList();
+    List<StudentDetail> actual = sut.searchStudentList();
 
     verify(repository, times(1)).search();
     verify(repository, times(1)).searchStudentCourseList();
     verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -101,7 +105,27 @@ class StudentServiceTest {
 
     verify(repository,times(1)).registerStudent(student);
     verify(repository, times(1)).registerStudentCourse(studentCourse);
+  }
 
+  @Test
+  void 受講生詳細の登録_正しい内容で保存されていること () {
+    Student student = new Student();
+    student.setId(999);
+    student.setName("名無し");
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
+    StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
+
+    ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
+
+    sut.registerStudent(studentDetail);
+
+    verify(repository).registerStudent(studentCaptor.capture());
+
+    Student actual = studentCaptor.getValue();
+
+    assertEquals(999, actual.getId());
+    assertEquals("名無し", actual.getName());
   }
 
   @Test
@@ -115,5 +139,26 @@ class StudentServiceTest {
 
     verify(repository,times(1)).updateStudent(student);
     verify(repository, times(1)).updateStudentCourse(studentCourse);
+  }
+
+  @Test
+  void 受講生詳細の更新_正しい内容で保存されていること () {
+    Student student = new Student();
+    student.setId(999);
+    student.setName("名無し");
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
+    StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
+
+    ArgumentCaptor<Student> Captor = ArgumentCaptor.forClass(Student.class);
+
+    sut.updateStudent(studentDetail);
+
+    verify(repository).updateStudent(Captor.capture());
+
+    Student actual = Captor.getValue();
+
+    assertEquals(999, actual.getId());
+    assertEquals("名無し", actual.getName());
   }
 }
