@@ -3,7 +3,6 @@ package raisetech.StudentManagement.controller.converter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
@@ -22,7 +21,7 @@ public class StudentConverter {
    * @param studentCourseList 受講生コース情報のリスト
    * @return　受講生詳細情報のリスト
    */
-  public @NonNull List<StudentDetail> convertStudentDetails(List<Student> studentList,
+  public List<StudentDetail> convertStudentDetails(List<Student> studentList,
       List<StudentCourse> studentCourseList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
     studentList.forEach(student -> {

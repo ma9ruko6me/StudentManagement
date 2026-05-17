@@ -19,9 +19,7 @@ public class StudentCourse {
   @NotBlank
   private String course;
 
-  @NotNull
   private LocalDate startDate;
 
-  @NotNull
   private LocalDate endDate;
 }
