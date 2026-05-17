@@ -23,7 +23,7 @@ public class Student {
   private String nickname;
 
   @NotBlank
-  @Email
+  @Email(message = "正しいメールアドレスを入力してください。")
   private String email;
 
   @NotBlank
