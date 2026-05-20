@@ -26,7 +26,7 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の単一検索ができること() {
-    int id = 1;
+    String id = "1";
     Student actual = sut.searchStudent(id);
     assertThat(actual.getId()).isEqualTo(id);
     assertThat(actual.getName()).isEqualTo("鈴木彩艶");
@@ -35,7 +35,7 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の単一検索で存在しないIDで検索した時にNULLが返ってくること() {
-    int id = 999;
+    String id = "999";
     Student actual = sut.searchStudent(id);
     assertThat(actual).isNull();
   }
@@ -48,14 +48,14 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生IDに紐づく受講生コース情報の検索ができること() {
-    int id = 3;
+    String id = "3";
     List<StudentCourse> actual = sut.searchStudentCourse(id);
     assertThat(actual.size()).isEqualTo(3);
   }
 
   @Test
   void 存在しない受講生IDに紐づく受講生コース情報の検索で空のリストが返ってくること() {
-    int id = 999;
+    String id = "999";
     List<StudentCourse> actual = sut.searchStudentCourse(id);
     assertThat(actual).isEmpty();
   }
@@ -82,7 +82,7 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の更新ができること() {
-    int id = 1;
+    String id = "1";
     Student expected = createStudent();
     expected.setId(id);
     sut.updateStudent(expected);
@@ -94,7 +94,7 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生コース情報の更新ができること() {
-    int id = 1;
+    String id = "1";
     StudentCourse expected = createStudentCourse();
     expected.setId(id);
     sut.updateStudentCourse(expected);
@@ -122,7 +122,7 @@ class StudentRepositoryTest {
   @Nonnull
   private static StudentCourse createStudentCourse() {
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setStudentId(1);
+    studentCourse.setStudentId("1");
     studentCourse.setCourse("テストコース");
     studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
     studentCourse.setEndDate(LocalDate.parse("2027-02-16"));

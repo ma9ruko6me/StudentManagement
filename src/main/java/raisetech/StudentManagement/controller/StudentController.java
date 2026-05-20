@@ -50,7 +50,7 @@ public class StudentController {
    */
   @Operation(summary = "受講生検索", description = "受講生を検索します。")
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable int id) {
+  public StudentDetail getStudent(@PathVariable String id) {
     return service.searchStudent(id);
   }
 

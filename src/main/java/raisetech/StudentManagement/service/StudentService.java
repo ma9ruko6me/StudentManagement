@@ -43,7 +43,7 @@ public class StudentService {
    * @param id 受講生ID
    * @return　受講生詳細
    */
-  public StudentDetail searchStudent(int id) {
+  public StudentDetail searchStudent(String id) {
     Student student = repository.searchStudent(id);
     List<StudentCourse> studentCourseList = repository.searchStudentCourse(id);
     return new StudentDetail(student, studentCourseList);

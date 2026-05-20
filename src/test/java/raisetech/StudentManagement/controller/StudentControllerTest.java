@@ -53,7 +53,7 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の検索が実行できてIDに対応したリストが返ってくること () throws Exception {
     Student student = new Student();
-    int id = 999;
+    String id = "999";
     student.setId(id);
     String name = "テスト四太郎";
     student.setName(name);
@@ -142,7 +142,7 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の受講生でEmailに適切な入力された時に入力チェックに異常が発生しないこと () throws Exception {
     Student student = new Student();
-    student.setId(111);
+    student.setId("111");
     student.setName("テスト太郎");
     student.setHurigana("てすとたろう");
     student.setNickname("テスト");
@@ -158,7 +158,7 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の受講生でEmailにメールアドレス以外が入力された時に入力チェックにかかること () throws Exception {
     Student student = new Student();
-    student.setId(111);
+    student.setId("111");
     student.setName("テスト太郎");
     student.setHurigana("てすとたろう");
     student.setNickname("テスト");
