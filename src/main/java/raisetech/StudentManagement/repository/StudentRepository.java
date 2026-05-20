@@ -2,6 +2,7 @@ package raisetech.StudentManagement.repository;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -68,4 +69,34 @@ public interface StudentRepository {
    * @param studentCourse
    */
   void updateStudentCourse(StudentCourse studentCourse);
+
+
+  /**
+   * 受講コースの申し込み状況の全件検索を行います。
+   *
+   * @return　受講コースの申し込み状況（全件）
+   */
+  List<CourseApplication> searchCourseApplicationList();
+
+  /**
+   * 受講コースIDに紐づく受講コースの申し込み状況を検索します。
+   *
+   * @param id 受講生ID
+   * @return　受講コースIDに紐づく受講コースの申し込み状況
+   */
+  CourseApplication searchCourseApplication(String id);
+
+  /**
+   * 受講コースの申し込み状況を新規登録します。 ID関しては自動採番を行います。
+   *
+   * @param courseApplication 受講コースの申し込み状況
+   */
+  void registerCourseApplication(CourseApplication courseApplication);
+
+  /**
+   * 受講コースの申し込み状況を更新します。
+   *
+   * @param courseApplication 受講コースの申し込み状況
+   */
+  void updateCourseApplication(CourseApplication courseApplication);
 }

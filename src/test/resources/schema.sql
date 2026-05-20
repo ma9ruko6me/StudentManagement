@@ -20,3 +20,11 @@ CREATE TABLE IF NOT EXISTS students_courses
     start_date TIMESTAMP,
     end_date TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS course_applications
+(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL UNIQUE,
+    status VARCHAR(10) NOT NULL
+);
