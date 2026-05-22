@@ -9,7 +9,7 @@ import lombok.Setter;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.StudentCourse;
 
-@Schema(description = "受講コース詳細")
+@Schema(description = "受講生コース詳細")
 @Getter
 @Setter
 @NoArgsConstructor

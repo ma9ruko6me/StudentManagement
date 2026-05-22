@@ -49,11 +49,8 @@ class CourseConverterTest {
 
     assertThat(actual.size()).isEqualTo(2);
 
-    assertThat(actual.get(0).getStudentCourse()).isEqualTo(studentCourse1);
-    assertThat(actual.get(0).getCourseApplication()).isEqualTo(courseApplication1);
-
-    assertThat(actual.get(1).getStudentCourse()).isEqualTo(studentCourse2);
-    assertThat(actual.get(1).getCourseApplication()).isEqualTo(courseApplication2);
+    assertThat(actual).extracting(CourseDetail::getStudentCourse).contains(studentCourse1, studentCourse2);
+    assertThat(actual).extracting(CourseDetail::getCourseApplication).contains(courseApplication1, courseApplication2);
   }
 
   @Test

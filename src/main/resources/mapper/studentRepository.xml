@@ -23,6 +23,16 @@
     SELECT * FROM students_courses WHERE student_id = #{id}
   </select>
 
+  <!--受講生コースの申込状況の全件検索-->
+  <select id="searchCourseApplicationList" resultType="raisetech.StudentManagement.data.CourseApplication">
+    SELECT * FROM course_applications
+  </select>
+
+  <!--受講生コースの申込状況の検索-->
+  <select id="searchCourseApplicationByStudentId" resultType="raisetech.StudentManagement.data.CourseApplication">
+    SELECT * FROM course_applications WHERE student_id = #{id}
+  </select>
+
   <!-- 受講生の登録 -->
   <insert id="registerStudent" useGeneratedKeys = "true" keyProperty = "id">
     INSERT INTO students (name,hurigana,nickname,age,email,area,gender,remark,is_deleted) VALUES (#{name},#{hurigana},#{nickname},#{age},#{email},#{area},#{gender},#{remark},0)
@@ -31,6 +41,11 @@
   <!-- 受講生コース情報の登録 -->
   <insert id="registerStudentCourse" useGeneratedKeys = "true" keyProperty = "id">
     INSERT INTO students_courses (student_id,course,start_date,end_date) VALUES (#{studentId},#{course},#{startDate},#{endDate})
+  </insert>
+
+  <!--受講生コースの申込状況の登録-->
+  <insert id="registerCourseApplication" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO course_applications (student_id,course_id,status) VALUES(#{studentId},#{courseId},#{status})
   </insert>
 
   <!-- 受講生の更新 -->
@@ -43,24 +58,7 @@
     UPDATE students_courses SET course = #{course} WHERE id = #{id}
   </update>
 
-
-
-  <!--受講コースの申し込み状況の全件検索-->
-  <select id="searchCourseApplicationList" resultType="raisetech.StudentManagement.data.CourseApplication">
-    SELECT * FROM course_applications
-  </select>
-
-  <!--受講コースの申し込み状況の検索-->
-  <select id="searchCourseApplication" resultType="raisetech.StudentManagement.data.CourseApplication">
-    SELECT * FROM course_applications WHERE course_id = #{id}
-  </select>
-
-  <!--受講コースの申し込み状況の登録-->
-  <insert id="registerCourseApplication" useGeneratedKeys="true" keyProperty="id">
-    INSERT INTO course_applications (student_id,course_id,status) VALUES(#{studentId},#{courseId},'仮申込')
-  </insert>
-
-  <!--受講コースの申し込み状況の更新-->
+  <!--受講生コースの申込状況の更新-->
   <update id="updateCourseApplication">
     UPDATE course_applications SET status = #{status} WHERE id = #{id}
   </update>

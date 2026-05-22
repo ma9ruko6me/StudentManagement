@@ -2,7 +2,6 @@ package raisetech.StudentManagement.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,9 +37,7 @@ public class StudentController {
    */
   @Operation(summary = "受講生一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.searchStudentList();
-  }
+  public List<StudentDetail> getStudentList() {return service.searchStudentlList();}
 
   /**
    * 受講生詳細の検索です。 IDに紐づく任意の受講生情報を取得します。
@@ -50,8 +47,13 @@ public class StudentController {
    */
   @Operation(summary = "受講生検索", description = "受講生を検索します。")
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable String id) {
-    return service.searchStudent(id);
+  public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
+    StudentDetail studentDetail = service.searchStudent(id);
+
+    if (studentDetail == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(studentDetail);
   }
 
   /**
@@ -62,8 +64,7 @@ public class StudentController {
    */
   @Operation(summary = "受講生登録", description = "受講生を登録します。")
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(
-      @RequestBody @Valid StudentDetail studentDetail) {
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }

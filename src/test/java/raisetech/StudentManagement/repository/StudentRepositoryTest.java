@@ -2,7 +2,6 @@ package raisetech.StudentManagement.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
@@ -63,13 +62,13 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講コースの申し込み状況の全件検索ができること() {
+  void 受講生コース申込状況の全件検索ができること() {
     List<CourseApplication> actual =sut.searchCourseApplicationList();
     assertThat(actual.size()).isEqualTo(9);
   }
 
   @Test
-  void 申込状況の全件検索で中身が正しく取得できること() {
+  void 受講生コース申込状況の全件検索で中身が正しく取得できること() {
     List<CourseApplication> actual =sut.searchCourseApplicationList();
 
     assertThat(actual.get(0).getId()).isEqualTo("1");
@@ -79,20 +78,20 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講コースIDに紐づく申し込み状況の検索ができること() {
+  void 受講生IDに紐づく受講生コース申込状況の検索ができること() {
     String id = "1";
-    CourseApplication actual = sut.searchCourseApplication(id);
-    assertThat(actual.getId()).isEqualTo(id);
-    assertThat(actual.getStudentId()).isEqualTo("1");
-    assertThat(actual.getCourseId()).isEqualTo("1");
-    assertThat(actual.getStatus()).isEqualTo("受講中");
+    List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
+    assertThat(actual.get(0).getId()).isEqualTo(id);
+    assertThat(actual.get(0).getStudentId()).isEqualTo("1");
+    assertThat(actual.get(0).getCourseId()).isEqualTo("1");
+    assertThat(actual.get(0).getStatus()).isEqualTo("受講中");
   }
 
   @Test
-  void 存在しない受講コースIDに紐づく申し込み状況の検索でnullが返ってくること() {
+  void 存在しない受講生IDに紐づく受講生コース申込状況の検索でnullが返ってくること() {
     String id = "999";
-    CourseApplication actual = sut.searchCourseApplication(id);
-    assertThat(actual).isNull();
+    List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
+    assertThat(actual).isEmpty();
   }
 
   @Test
@@ -116,10 +115,11 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講コースの申し込み状況の登録ができること() {
+  void 受講生コース申込状況の登録ができること() {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("10");
     courseApplication.setCourseId("10");
+    courseApplication.setStatus("仮申込");
 
     sut.registerCourseApplication(courseApplication);
 
@@ -127,21 +127,21 @@ class StudentRepositoryTest {
     assertThat(actual.size()).isEqualTo(10);
     assertThat(actual.get(9).getStudentId()).isEqualTo(courseApplication.getStudentId());
     assertThat(actual.get(9).getCourseId()).isEqualTo(courseApplication.getCourseId());
-    //デフォルト値（仮申込）が設定されていること
-    assertThat(actual.get(9).getStatus()).isEqualTo("仮申込");
+    assertThat(actual.get(9).getStatus()).isEqualTo(courseApplication.getStatus());
   }
 
   @Test
-  void 同じ受講コースIDは登録できないこと() {
+  void 同じ受講生コースIDを持つ受講生コース申込状況の登録をした時にエラーが返ってくること() {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("1");
     courseApplication.setCourseId("1");
+    courseApplication.setStatus("仮申込");
 
     assertThatThrownBy(() -> sut.registerCourseApplication(courseApplication)).isInstanceOf(Exception.class);
   }
 
   @Test
-  void 受講生IDのない受講コースの申し込み状況の登録をしたときにエラーが返ってくること() {
+  void 受講生IDのない受講生コース申込状況の登録をしたときにエラーが返ってくること() {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setCourseId("20");
 
@@ -150,7 +150,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講コースIDのない受講コースの申し込み状況の登録をしたときにエラーが返ってくること() {
+  void 受講生コースIDのない受講生コース申込状況の登録をしたときにエラーが返ってくること() {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("20");
 
@@ -183,7 +183,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講コースの申し込み状況の更新ができること() {
+  void 受講生コース申込状況の更新ができること() {
     String id = "1";
     CourseApplication expected = new CourseApplication();
     expected.setId(id);
@@ -191,15 +191,15 @@ class StudentRepositoryTest {
 
     sut.updateCourseApplication(expected);
 
-    CourseApplication actual = sut.searchCourseApplication(id);
-    assertThat(actual.getStatus()).isEqualTo(expected.getStatus());
+    List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
+    assertThat(actual.get(0).getStatus()).isEqualTo(expected.getStatus());
   }
 
   @Test
-  void 申し込み状況のstutus以外は更新がされないこと() {
+  void 受講生コース申込状況のstutus以外は更新がされないこと() {
     String id = "1";
 
-    CourseApplication expected = sut.searchCourseApplication(id);
+    List<CourseApplication> expected = sut.searchCourseApplicationByStudentId(id);
 
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setId(id);
@@ -207,10 +207,10 @@ class StudentRepositoryTest {
 
     sut.updateCourseApplication(courseApplication);
 
-    CourseApplication actual = sut.searchCourseApplication(id);
+    List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
 
-    assertThat(actual.getStudentId()).isEqualTo(expected.getStudentId());
-    assertThat(actual.getCourseId()).isEqualTo(expected.getCourseId());
+    assertThat(actual.get(0).getStudentId()).isEqualTo(expected.get(0).getStudentId());
+    assertThat(actual.get(0).getCourseId()).isEqualTo(expected.get(0).getCourseId());
   }
 
   @Nonnull
