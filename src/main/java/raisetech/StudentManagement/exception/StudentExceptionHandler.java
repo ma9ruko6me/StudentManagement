@@ -12,4 +12,9 @@ public class StudentExceptionHandler {
   public ResponseEntity<String> handleTestException(TestException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
+
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<String> handle(RuntimeException e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+  }
 }

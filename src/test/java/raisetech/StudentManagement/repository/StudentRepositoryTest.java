@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +29,18 @@ class StudentRepositoryTest {
   @Test
   void 受講生の単一検索ができること() {
     String id = "1";
-    Student actual = sut.searchStudent(id);
-    assertThat(actual.getId()).isEqualTo(id);
-    assertThat(actual.getName()).isEqualTo("鈴木彩艶");
-    assertThat(actual.getAge()).isEqualTo(22);
+    Optional<Student> actual = sut.searchStudent(id);
+    assertThat(actual).isPresent();
+    assertThat(actual.get().getId()).isEqualTo(id);
+    assertThat(actual.get().getName()).isEqualTo("鈴木彩艶");
+    assertThat(actual.get().getAge()).isEqualTo(22);
   }
 
   @Test
-  void 受講生の単一検索で存在しないIDで検索した時にNULLが返ってくること() {
+  void 受講生の単一検索で存在しないIDの場合はOptionalが空で返ってくること() {
     String id = "999";
-    Student actual = sut.searchStudent(id);
-    assertThat(actual).isNull();
+    Optional<Student> actual = sut.searchStudent(id);
+    assertThat(actual).isEmpty();
   }
 
   @Test
@@ -165,9 +167,9 @@ class StudentRepositoryTest {
     expected.setId(id);
     sut.updateStudent(expected);
 
-    Student actual = sut.searchStudent(id);
-    assertThat(actual.getAge()).isEqualTo(expected.getAge());
-    assertThat(actual.getName()).isEqualTo(expected.getName());
+    Optional<Student> actual = sut.searchStudent(id);
+    assertThat(actual.get().getAge()).isEqualTo(expected.getAge());
+    assertThat(actual.get().getName()).isEqualTo(expected.getName());
   }
 
   @Test

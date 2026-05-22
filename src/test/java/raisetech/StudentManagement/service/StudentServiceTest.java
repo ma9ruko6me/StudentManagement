@@ -13,6 +13,7 @@ import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -136,7 +137,7 @@ class StudentServiceTest {
     expected.setStudent(student);
     expected.setCourseDetailList(courseDetailList);
 
-    when(repository.searchStudent(id)).thenReturn(student);
+    when(repository.searchStudent(id)).thenReturn(Optional.of(student));
     when(repository.searchStudentCourse(id)).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(courseApplicationList);
     when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
@@ -153,24 +154,18 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の単一検索_不正ID (){
+  void 受講生詳細の単一検索_存在しないIDで検索すると例外になること (){
     String id = "999";
 
-    when(repository.searchStudent(id)).thenReturn(null);
-    when(repository.searchStudentCourse(id)).thenReturn(List.of());
-    when(repository.searchCourseApplicationByStudentId(id)).thenReturn(List.of());
+    when(repository.searchStudent(id)).thenReturn(Optional.empty());
 
-    StudentDetail actual = sut.searchStudent(id);
-
-    assertThat(actual).isNotNull();
-    assertThat(actual.getStudent()).isNull();
-    assertThat(actual.getCourseDetailList()).isEmpty();
+    assertThatThrownBy(()->sut.searchStudent(id)).isInstanceOf(RuntimeException.class);
   }
 
   @Test
-  void 受講生詳細の単一検索_全てから (){
+  void 受講生詳細の単一検索_全リポジトリがからを返してもStudentDetailを返すこと (){
     String id = "999";
-    when(repository.searchStudent(id)).thenReturn(new Student());
+    when(repository.searchStudent(id)).thenReturn(Optional.of(new Student()));
     when(repository.searchStudentCourse(id)).thenReturn(new ArrayList<>());
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(new ArrayList<>());
 

@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,12 +50,7 @@ public class StudentController {
   @Operation(summary = "受講生検索", description = "受講生を検索します。")
   @GetMapping("/student/{id}")
   public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
-    StudentDetail studentDetail = service.searchStudent(id);
-
-    if (studentDetail == null) {
-      return ResponseEntity.notFound().build();
-    }
-    return ResponseEntity.ok(studentDetail);
+    return ResponseEntity.ok(service.searchStudent(id));
   }
 
   /**

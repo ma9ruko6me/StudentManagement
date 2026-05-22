@@ -53,7 +53,8 @@ public class StudentService {
    * @return　受講生詳細
    */
   public StudentDetail searchStudent(String id) {
-    Student student = repository.searchStudent(id);
+    Student student = repository.searchStudent(id)
+        .orElseThrow(() -> new RuntimeException("Student not found" + id));
     List<StudentCourse> studentCourseList = repository.searchStudentCourse(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
     return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));

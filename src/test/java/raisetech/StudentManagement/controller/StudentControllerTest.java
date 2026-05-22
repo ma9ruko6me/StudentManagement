@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,9 +80,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の検索で存在しないIDを検索したときにエラーが返ってくること()  throws Exception {
+  void 受講生詳細の検索で存在しないIDを検索したときにNotFoundが返ってくること()  throws Exception {
     String id = "999";
-    when(service.searchStudent(id)).thenReturn(null);
+    when(service.searchStudent(id)).thenThrow(new RuntimeException("Student not found"));
 
     mockMvc.perform(get("/student/{id}", id))
         .andExpect(status().isNotFound());
