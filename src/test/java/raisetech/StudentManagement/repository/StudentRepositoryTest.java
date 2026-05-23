@@ -2,8 +2,8 @@ package raisetech.StudentManagement.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
-import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -31,10 +31,14 @@ class StudentRepositoryTest {
   void 受講生の単一検索ができること() {
     String id = "1";
     Optional<Student> actual = sut.searchStudent(id);
-    assertThat(actual).isPresent();
-    assertThat(actual.get().getId()).isEqualTo(id);
-    assertThat(actual.get().getName()).isEqualTo("鈴木彩艶");
-    assertThat(actual.get().getAge()).isEqualTo(22);
+    assertThat(actual)
+        .isPresent()
+        .get()
+        .satisfies(student -> {
+          assertThat(student.getId()).isEqualTo(id);
+          assertThat(student.getName()).isEqualTo("鈴木彩艶");
+          assertThat(student.getAge()).isEqualTo(22);
+        });
   }
 
   @Test
@@ -74,20 +78,25 @@ class StudentRepositoryTest {
   void 受講生コース申込状況の全件検索で中身が正しく取得できること() {
     List<CourseApplication> actual =sut.searchCourseApplicationList();
 
-    assertThat(actual.get(0).getId()).isEqualTo("1");
-    assertThat(actual.get(0).getStudentId()).isEqualTo("1");
-    assertThat(actual.get(0).getCourseId()).isEqualTo("1");
-    assertThat(actual.get(0).getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
+    assertThat(actual)
+        .extracting(
+            CourseApplication::getId,
+            CourseApplication::getStudentId,
+            CourseApplication::getCourseId,
+            CourseApplication::getStatus
+        )
+        .contains(
+            tuple("1","1","1",ApplicationStatus.IN_PROGRESS)
+        );
   }
 
   @Test
   void 受講生IDに紐づく受講生コース申込状況の検索ができること() {
     String id = "1";
     List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
-    assertThat(actual.get(0).getId()).isEqualTo(id);
-    assertThat(actual.get(0).getStudentId()).isEqualTo("1");
-    assertThat(actual.get(0).getCourseId()).isEqualTo("1");
-    assertThat(actual.get(0).getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
+
+    assertThat(actual)
+        .allSatisfy(courseApplication -> assertThat(courseApplication.getId()).isEqualTo(id));
   }
 
   @Test
@@ -99,7 +108,17 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の登録が行えること () {
-    Student student = createStudent();
+    Student student1 = new Student();
+    student1.setName("テスト四太郎");
+    student1.setHurigana("てすとしたろう");
+    student1.setNickname("テスト大好きくん");
+    student1.setEmail("test@example.com");
+    student1.setArea("テスト県");
+    student1.setAge(18);
+    student1.setGender("男性");
+    student1.setRemark("");
+    student1.setDeleted(false);
+    Student student = student1;
 
     sut.registerStudent(student);
 
@@ -109,7 +128,12 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生コース情報の登録ができること() {
-    StudentCourse studentCourse = createStudentCourse();
+    StudentCourse studentCourse1 = new StudentCourse();
+    studentCourse1.setStudentId("1");
+    studentCourse1.setCourse("テストコース");
+    studentCourse1.setStartDate(LocalDate.parse("2026-02-16"));
+    studentCourse1.setEndDate(LocalDate.parse("2027-02-16"));
+    StudentCourse studentCourse = studentCourse1;
 
     sut.registerStudentCourse(studentCourse);
 
@@ -128,9 +152,13 @@ class StudentRepositoryTest {
 
     List<CourseApplication> actual =sut.searchCourseApplicationList();
     assertThat(actual.size()).isEqualTo(10);
-    assertThat(actual.get(9).getStudentId()).isEqualTo(courseApplication.getStudentId());
-    assertThat(actual.get(9).getCourseId()).isEqualTo(courseApplication.getCourseId());
-    assertThat(actual.get(9).getStatus()).isEqualTo(courseApplication.getStatus());
+    assertThat(actual)
+        .extracting(
+            CourseApplication::getStudentId,
+            CourseApplication::getCourseId,
+            CourseApplication::getStatus
+        )
+        .contains(tuple("10","10",ApplicationStatus.TEMP));
   }
 
   @Test
@@ -162,82 +190,116 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生の更新ができること() {
+  void 受講生のnameの更新ができること() {
     String id = "1";
-    Student expected = createStudent();
-    expected.setId(id);
+    Student before = sut.searchStudent(id).orElseThrow();
+
+    Student expected = new Student();
+    expected.setId(before.getId());
+    expected.setName(before.getName());
+    expected.setAge(before.getAge());
+
+    expected.setName("テスト四太郎");
+
     sut.updateStudent(expected);
 
-    Optional<Student> actual = sut.searchStudent(id);
-    assertThat(actual.get().getAge()).isEqualTo(expected.getAge());
-    assertThat(actual.get().getName()).isEqualTo(expected.getName());
+    Student after = sut.searchStudent(id).orElseThrow();
+
+    assertThat(after)
+        .satisfies(student -> {
+          assertThat(student.getId()).isEqualTo(before.getId());
+
+          assertThat(student.getName())
+              .isEqualTo(expected.getName())
+              .isNotEqualTo(before.getName());
+
+          assertThat(student.getAge())
+              .isEqualTo(before.getAge());
+        });
+  }
+
+  @Test
+  void 受講生の更新ができること() {
+    String id = "1";
+    Student before = sut.searchStudent(id).orElseThrow();
+
+    Student expected = new Student();
+    expected.setId(before.getId());
+    expected.setName(before.getName());
+    expected.setAge(before.getAge());
+
+    expected.setName("テスト四太郎");
+
+    sut.updateStudent(expected);
+
+    Student after = sut.searchStudent(id).orElseThrow();
+
+    assertThat(after)
+        .satisfies(student -> {
+          assertThat(student.getId()).isEqualTo(before.getId());
+
+          assertThat(student.getName())
+              .isEqualTo(expected.getName())
+              .isNotEqualTo(before.getName());
+
+          assertThat(student.getAge())
+              .isEqualTo(before.getAge());
+        });
   }
 
   @Test
   void 受講生コース情報の更新ができること() {
     String id = "1";
-    StudentCourse expected = createStudentCourse();
-    expected.setId(id);
+
+    StudentCourse before = sut.searchStudentCourse(id).get(0);
+
+    StudentCourse expected = new StudentCourse();
+    expected.setId(before.getId());
+    expected.setStudentId(before.getStudentId());
+    expected.setCourse("テストコース");
+    expected.setStartDate(before.getStartDate());
+    expected.setEndDate(before.getEndDate());
+
     sut.updateStudentCourse(expected);
 
     List<StudentCourse> actual = sut.searchStudentCourse(id);
-    assertThat(actual.get(0).getStudentId()).isEqualTo(expected.getStudentId());
-    assertThat(actual.get(0).getCourse()).isEqualTo(expected.getCourse());
+
+    assertThat(actual)
+        .anySatisfy(studentCourse -> {
+          assertThat(studentCourse.getId())
+              .isEqualTo(before.getId());
+
+          assertThat(studentCourse.getStudentId())
+              .isEqualTo(before.getStudentId());
+
+          assertThat(studentCourse.getCourse())
+              .isEqualTo(expected.getCourse())
+              .isNotEqualTo(before.getCourse());
+        });
   }
 
   @Test
   void 受講生コース申込状況の更新ができること() {
     String id = "1";
+    CourseApplication before = sut.searchCourseApplicationByStudentId(id).get(0);
     CourseApplication expected = new CourseApplication();
-    expected.setId(id);
+    expected.setId(before.getId());
+    expected.setStudentId(before.getStudentId());
+    expected.setCourseId(before.getCourseId());
     expected.setStatus(ApplicationStatus.FORMAL);
 
     sut.updateCourseApplication(expected);
 
     List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
-    assertThat(actual.get(0).getStatus()).isEqualTo(expected.getStatus());
-  }
 
-  @Test
-  void 受講生コース申込状況のstutus以外は更新がされないこと() {
-    String id = "1";
+    assertThat(actual).anySatisfy(courseApplication -> {
+      assertThat(courseApplication.getId()).isEqualTo(before.getId());
+      assertThat(courseApplication.getStudentId()).isEqualTo(before.getStudentId());
+      assertThat(courseApplication.getCourseId()).isEqualTo(before.getCourseId());
 
-    List<CourseApplication> expected = sut.searchCourseApplicationByStudentId(id);
-
-    CourseApplication courseApplication = new CourseApplication();
-    courseApplication.setId(id);
-    courseApplication.setStatus(ApplicationStatus.FORMAL);
-
-    sut.updateCourseApplication(courseApplication);
-
-    List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
-
-    assertThat(actual.get(0).getStudentId()).isEqualTo(expected.get(0).getStudentId());
-    assertThat(actual.get(0).getCourseId()).isEqualTo(expected.get(0).getCourseId());
-  }
-
-  @Nonnull
-  private static Student createStudent() {
-    Student student = new Student();
-    student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
-    student.setNickname("テスト大好きくん");
-    student.setEmail("test@example.com");
-    student.setArea("テスト県");
-    student.setAge(18);
-    student.setGender("男性");
-    student.setRemark("");
-    student.setDeleted(false);
-    return student;
-  }
-
-  @Nonnull
-  private static StudentCourse createStudentCourse() {
-    StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
-    studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
-    studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
-    return studentCourse;
+      assertThat(courseApplication.getStatus())
+          .isEqualTo(expected.getStatus())
+          .isNotEqualTo(before.getStatus());
+    });
   }
 }

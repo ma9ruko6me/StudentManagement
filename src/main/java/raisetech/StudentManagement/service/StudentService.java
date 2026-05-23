@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.xmlunit.diff.Comparison.Detail;
 import raisetech.StudentManagement.controller.converter.CourseConverter;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.CourseApplication;
@@ -75,10 +76,9 @@ public class StudentService {
 
     repository.registerStudent(student);
     studentDetail.getCourseDetailList().forEach(courseDetail -> {
-      initCourseDetail(studentDetail);
-      repository.registerStudentCourse(studentDetail.getCourseDetailList().getFirst().getStudentCourse());
-      repository.registerCourseApplication(studentDetail.getCourseDetailList().getFirst()
-          .getCourseApplication());
+      initCourseDetail(courseDetail,studentDetail.getStudent().getId());
+      repository.registerStudentCourse(courseDetail.getStudentCourse());
+      repository.registerCourseApplication(courseDetail.getCourseApplication());
     });
     return studentDetail;
   }
@@ -86,18 +86,19 @@ public class StudentService {
   /**
    * 受講生コース情報と受講生コース申込状況を登録する際の初期設定をする。
    *
-   * @param studentDetail 受講生
+   * @param courseDetail 受講生コース詳細
+   * @param id 受講生ID
    */
-  private void initCourseDetail(StudentDetail studentDetail) {
-    StudentCourse studentCourse = studentDetail.getCourseDetailList().getFirst().getStudentCourse();
-    CourseApplication courseApplication = studentDetail.getCourseDetailList().getFirst().getCourseApplication();
+  private void initCourseDetail(CourseDetail courseDetail,String id) {
+    StudentCourse studentCourse = courseDetail.getStudentCourse();
+    CourseApplication courseApplication = courseDetail.getCourseApplication();
     LocalDate now = LocalDate.now();
 
-    studentCourse.setStudentId(studentDetail.getStudent().getId());
+    studentCourse.setStudentId(id);
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
 
-    courseApplication.setStudentId(studentDetail.getStudent().getId());
+    courseApplication.setStudentId(id);
     courseApplication.setCourseId(studentCourse.getId());
     courseApplication.setStatus(ApplicationStatus.TEMP);
   }
