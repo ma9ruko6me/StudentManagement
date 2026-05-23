@@ -27,6 +27,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -251,7 +252,7 @@ class StudentServiceTest {
 
     assertThat(courseApplicationCaptor.getValue().getStudentId()).isEqualTo(student.getId());
     assertThat(courseApplicationCaptor.getValue().getCourseId()).isEqualTo(studentCourse.getId());
-    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo("仮申込");
+    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(ApplicationStatus.TEMP);
   }
 
   @Test
@@ -356,7 +357,7 @@ class StudentServiceTest {
     courseApplication.setId("1");
     courseApplication.setStudentId(student.getId());
     courseApplication.setCourseId(studentCourse.getId());
-    courseApplication.setStatus("テスト");
+    courseApplication.setStatus(ApplicationStatus.TEMP);
     return courseApplication;
   }
 }

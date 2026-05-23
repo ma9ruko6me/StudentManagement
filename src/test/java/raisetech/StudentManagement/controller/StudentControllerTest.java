@@ -147,7 +147,7 @@ class StudentControllerTest {
                              "id": "6",
                              "studentId": "6",
                              "courseId": "6",
-                             "status": "本申込"
+                             "status": "FORMAL"
                            }
                          }
                        ]

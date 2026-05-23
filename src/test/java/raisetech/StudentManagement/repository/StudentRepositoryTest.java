@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.enums.ApplicationStatus;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -76,7 +77,7 @@ class StudentRepositoryTest {
     assertThat(actual.get(0).getId()).isEqualTo("1");
     assertThat(actual.get(0).getStudentId()).isEqualTo("1");
     assertThat(actual.get(0).getCourseId()).isEqualTo("1");
-    assertThat(actual.get(0).getStatus()).isEqualTo("受講中");
+    assertThat(actual.get(0).getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
   }
 
   @Test
@@ -86,7 +87,7 @@ class StudentRepositoryTest {
     assertThat(actual.get(0).getId()).isEqualTo(id);
     assertThat(actual.get(0).getStudentId()).isEqualTo("1");
     assertThat(actual.get(0).getCourseId()).isEqualTo("1");
-    assertThat(actual.get(0).getStatus()).isEqualTo("受講中");
+    assertThat(actual.get(0).getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
   }
 
   @Test
@@ -121,7 +122,7 @@ class StudentRepositoryTest {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("10");
     courseApplication.setCourseId("10");
-    courseApplication.setStatus("仮申込");
+    courseApplication.setStatus(ApplicationStatus.TEMP);
 
     sut.registerCourseApplication(courseApplication);
 
@@ -137,7 +138,7 @@ class StudentRepositoryTest {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("1");
     courseApplication.setCourseId("1");
-    courseApplication.setStatus("仮申込");
+    courseApplication.setStatus(ApplicationStatus.TEMP);
 
     assertThatThrownBy(() -> sut.registerCourseApplication(courseApplication)).isInstanceOf(Exception.class);
   }
@@ -189,7 +190,7 @@ class StudentRepositoryTest {
     String id = "1";
     CourseApplication expected = new CourseApplication();
     expected.setId(id);
-    expected.setStatus("本申込");
+    expected.setStatus(ApplicationStatus.FORMAL);
 
     sut.updateCourseApplication(expected);
 
@@ -205,7 +206,7 @@ class StudentRepositoryTest {
 
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setId(id);
-    courseApplication.setStatus("本申込");
+    courseApplication.setStatus(ApplicationStatus.FORMAL);
 
     sut.updateCourseApplication(courseApplication);
 

@@ -20,12 +20,12 @@ VALUES
 
 INSERT INTO course_applications (student_id,course_id,status)
 VALUES
-    (1,1,'受講中'),
-    (2,2,'受講終了'),
-    (2,3,'仮申込'),
-    (3,4,'受講終了'),
-    (3,5,'受講中'),
-    (3,6,'本申込'),
-    (4,7,'受講終了'),
-    (4,8,'本申込'),
-    (5,9,'仮申込');
+    (1,1,'IN_PROGRESS'),
+    (2,2,'COMPLETED'),
+    (2,3,'TEMP'),
+    (3,4,'COMPLETED'),
+    (3,5,'IN_PROGRESS'),
+    (3,6,'FORMAL'),
+    (4,7,'COMPLETED'),
+    (4,8,'FORMAL'),
+    (5,9,'TEMP');

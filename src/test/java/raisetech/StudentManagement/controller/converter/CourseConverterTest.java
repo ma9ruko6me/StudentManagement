@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
+import raisetech.StudentManagement.enums.ApplicationStatus;
 
 class CourseConverterTest {
 
@@ -30,7 +31,7 @@ class CourseConverterTest {
     courseApplication1.setId("1");
     courseApplication1.setCourseId("1");
     courseApplication1.setStudentId("1");
-    courseApplication1.setStatus("本申込");
+    courseApplication1.setStatus(ApplicationStatus.FORMAL);
 
     StudentCourse studentCourse2 = new StudentCourse();
     studentCourse2.setId("2");
@@ -40,7 +41,7 @@ class CourseConverterTest {
     courseApplication2.setId("2");
     courseApplication2.setCourseId("2");
     courseApplication2.setStudentId("2");
-    courseApplication2.setStatus("受講中");
+    courseApplication2.setStatus(ApplicationStatus.IN_PROGRESS);
 
     List<StudentCourse> studentCourseList = List.of(studentCourse1, studentCourse2);
     List<CourseApplication> courseApplicationList = List.of(courseApplication1, courseApplication2);
@@ -63,7 +64,7 @@ class CourseConverterTest {
     courseApplication.setId("1");
     courseApplication.setCourseId("2");
     courseApplication.setStudentId("2");
-    courseApplication.setStatus("本申込");
+    courseApplication.setStatus(ApplicationStatus.FORMAL);
 
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     List<CourseApplication> courseApplicationList = List.of(courseApplication);

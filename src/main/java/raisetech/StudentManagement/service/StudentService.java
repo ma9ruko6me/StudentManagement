@@ -12,6 +12,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 /**
@@ -98,7 +99,7 @@ public class StudentService {
 
     courseApplication.setStudentId(studentDetail.getStudent().getId());
     courseApplication.setCourseId(studentCourse.getId());
-    courseApplication.setStatus("仮申込");
+    courseApplication.setStatus(ApplicationStatus.TEMP);
   }
 
   /**
