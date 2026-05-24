@@ -4,16 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
@@ -67,6 +66,19 @@ public class StudentController {
   }
 
   /**
+   * 受講生コース詳細の追加を行います。
+   *
+   * @param id 受講生ID
+   * @param courseDetail 受講生詳細
+   * @return　実行結果
+   */
+  @PostMapping("/addCourse/{id}")
+  public ResponseEntity<StudentDetail> addCourseDetail(@PathVariable String id, @RequestBody @Valid CourseDetail courseDetail) {
+    StudentDetail responseStudentDetail = service.addCourseDetail(id, courseDetail);
+    return ResponseEntity.ok(responseStudentDetail);
+  }
+
+  /**
    * 受講生詳細の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
    *
    * @param studentDetail 受講生詳細
@@ -79,7 +91,13 @@ public class StudentController {
     return ResponseEntity.ok("更新処理が成功しました。");
   }
 
-  @Operation(summary = "例外処理", description = "例外を発生させます。")
+  /**
+   * テスト用に例外を発生させるAPIです。
+   * グローバル例外ハンドリングやエラーレスポンスの動作確認を目的としています。
+   *
+   * @throws TestException 常にスローされる例外
+   */
+  @Operation(summary = "例外発生テスト", description = "例外を意図的に発生させ、エラーハンドリングを確認します。")
   @GetMapping("/testException")
   public List<StudentDetail> testException() throws TestException {
     throw new TestException("これは例外を発生させるAPIです。");

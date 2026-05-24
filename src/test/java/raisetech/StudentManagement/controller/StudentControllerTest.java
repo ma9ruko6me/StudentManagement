@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
+import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -42,7 +44,7 @@ class StudentControllerTest {
   private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
   @Test
-  void 受講生詳細の一覧検索が実行できて空のリストが返ってくること () throws Exception {
+  void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
@@ -51,7 +53,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索が実行できてデータのあるリストが返ってくること () throws Exception {
+  void 受講生詳細の一覧検索が実行できてデータのあるリストが返ってくること() throws Exception {
     Student student = createStudent();
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setStudent(student);
@@ -65,9 +67,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の検索が実行できてIDに対応したリストが返ってくること () throws Exception {
+  void 受講生詳細の検索が実行できてIDに対応したリストが返ってくること() throws Exception {
     Student student = createStudent();
-    StudentDetail studentDetail = new StudentDetail(student,new ArrayList<>());
+    StudentDetail studentDetail = new StudentDetail(student, new ArrayList<>());
     String id = student.getId();
     when(service.searchStudent(id)).thenReturn(studentDetail);
 
@@ -80,7 +82,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の検索で存在しないIDを検索したときにNotFoundが返ってくること()  throws Exception {
+  void 受講生詳細の検索で存在しないIDを検索したときにNotFoundが返ってくること() throws Exception {
     String id = "999";
     when(service.searchStudent(id)).thenThrow(new RuntimeException("Student not found"));
 
@@ -89,37 +91,84 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の登録が実行できて空で返ってくること () throws Exception {
+  void 受講生詳細の登録が実行できること() throws Exception {
+    when(service.registerStudent(any())).thenReturn(new StudentDetail());
+
     mockMvc.perform(post("/registerStudent").contentType(MediaType.APPLICATION_JSON).content(
             """
-                {
-                    "student": {
-                        "name": "久保建英",
-                        "hurigana": "くぼたけふさ",
-                        "nickname": "タケ",
-                        "email": "take.kubo@example.com",
-                        "area": "神奈川県",
-                        "age": 23,
-                        "gender": "男性",
-                        "remark": ""
-                    },
-                    "courseDetailList": [
-                         {
-                           "studentCourse": {
-                             "course": "デザインコース"
-                           }
-                         }
-                    ]
-                }
-            """
+                    {
+                        "student": {
+                            "name": "久保建英",
+                            "hurigana": "くぼたけふさ",
+                            "nickname": "タケ",
+                            "email": "take.kubo@example.com",
+                            "area": "神奈川県",
+                            "age": 23,
+                            "gender": "男性",
+                            "remark": ""
+                        },
+                        "courseDetailList": [
+                             {
+                               "studentCourse": {
+                                 "course": "デザインコース"
+                               }
+                             }
+                        ]
+                    }
+                """
         ))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).registerStudent(any());
+    ArgumentCaptor<StudentDetail> studentDetailArgumentCaptor = ArgumentCaptor.forClass(StudentDetail.class);
+
+    verify(service, times(1)).registerStudent(studentDetailArgumentCaptor.capture());
+
+    assertThat(studentDetailArgumentCaptor.getValue().getStudent())
+        .satisfies(student -> {
+          assertThat(student.getName()).isEqualTo("久保建英");
+          assertThat(student.getEmail()).isEqualTo("take.kubo@example.com");
+          assertThat(student.getAge()).isEqualTo(23);
+        });
+
+    assertThat(studentDetailArgumentCaptor.getValue().getCourseDetailList())
+        .hasSize(1)
+        .first()
+        .satisfies(courseDetail -> {
+          assertThat(courseDetail.getStudentCourse().getCourse()).isEqualTo("デザインコース");
+        });
   }
 
   @Test
-  void 受講生詳細の更新が実行できて空で返ってくること () throws Exception {
+  void 受講生コース詳細の追加が実行できること() throws Exception {
+    when(service.addCourseDetail(any(),any())).thenReturn(new StudentDetail());
+
+    mockMvc.perform(post("/addCourse/999")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"studentCourse": {"course": "デザインコース"}}
+                """))
+        .andExpect(status().isOk());
+
+    ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<CourseDetail> courseDetailCaptor = ArgumentCaptor.forClass(CourseDetail.class);
+
+    verify(service, times(1)).addCourseDetail(idCaptor.capture(),courseDetailCaptor.capture());
+
+    assertThat(idCaptor.getValue()).isEqualTo("999");
+    assertThat(courseDetailCaptor.getValue().getStudentCourse().getCourse()).isEqualTo("デザインコース");
+  }
+
+  @Test
+  void 存在しない受講生IDに紐づく受講生コース詳細の追加でNotFoundが返ってくること() throws Exception {
+    String id = "999";
+    when(service.searchStudent(id)).thenThrow(new RuntimeException("Student not found"));
+
+    mockMvc.perform(post("/addCourse/999"))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 受講生詳細の更新が実行できて空で返ってくること() throws Exception {
     mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
             """
                     {
@@ -161,14 +210,15 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の例外APIが実行できてステータスが400で帰ってくること () throws Exception {
+  void 受講生詳細の例外APIが実行できてステータスが400で帰ってくること() throws Exception {
     mockMvc.perform(get("/testException"))
         .andExpect(status().is4xxClientError())
         .andExpect(content().string("これは例外を発生させるAPIです。"));
   }
 
   @Test
-  void 受講生詳細の受講生で名前が正しく入力された時に入力チェックに異常が発生しないこと() throws Exception {
+  void 受講生詳細の受講生で名前が正しく入力された時に入力チェックに異常が発生しないこと()
+      throws Exception {
     Student student = createStudent();
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
@@ -187,7 +237,8 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でIDに数字が入力された時に入力チェックに異常が発生しないこと() throws Exception {
+  void 受講生詳細の受講生でIDに数字が入力された時に入力チェックに異常が発生しないこと()
+      throws Exception {
     Student student = createStudent();
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
@@ -206,7 +257,8 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でEmailに適切な入力された時に入力チェックに異常が発生しないこと () throws Exception {
+  void 受講生詳細の受講生でEmailに適切な入力された時に入力チェックに異常が発生しないこと()
+      throws Exception {
     Student student = createStudent();
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
@@ -215,7 +267,8 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でEmailにメールアドレス以外が入力された時に入力チェックにかかること () throws Exception {
+  void 受講生詳細の受講生でEmailにメールアドレス以外が入力された時に入力チェックにかかること()
+      throws Exception {
     Student student = createStudent();
     student.setEmail("testexample.com");
 

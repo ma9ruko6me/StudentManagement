@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.xmlunit.diff.Comparison.Detail;
 import raisetech.StudentManagement.controller.converter.CourseConverter;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.CourseApplication;
@@ -76,30 +75,65 @@ public class StudentService {
 
     repository.registerStudent(student);
     studentDetail.getCourseDetailList().forEach(courseDetail -> {
-      initCourseDetail(courseDetail,studentDetail.getStudent().getId());
+      initStudentCourse(courseDetail,studentDetail.getStudent().getId());
       repository.registerStudentCourse(courseDetail.getStudentCourse());
+      initCourseApplication(courseDetail,studentDetail.getStudent().getId());
       repository.registerCourseApplication(courseDetail.getCourseApplication());
     });
     return studentDetail;
   }
 
   /**
-   * 受講生コース情報と受講生コース申込状況を登録する際の初期設定をする。
+   * 受講生コース詳細の登録を行います。 受講生コース情報、受講生コース申込状況を個別に登録します。
+   * 受講生コース情報には受講生情報を紐づける値やコース開始日、コース終了日を設定します。
+   * 受講生コース申込状況には受講生情報と受講生コース情報を結びつける値と申込状況を設定します。
+   *
+   * @param id 受講生ID
+   * @param courseDetail 受講生コース詳細
+   * @return　登録情報を付与した受講生詳細
+   */
+  @Transactional
+  public StudentDetail addCourseDetail(String id, CourseDetail courseDetail) {
+    Student student = repository.searchStudent(id)
+        .orElseThrow(() -> new RuntimeException("Student not found" + id));
+
+    initStudentCourse(courseDetail,id);
+    repository.registerStudentCourse(courseDetail.getStudentCourse());
+    initCourseApplication(courseDetail,id);
+    repository.registerCourseApplication(courseDetail.getCourseApplication());
+
+    List<StudentCourse> studentCourseList = repository.searchStudentCourse(id);
+    List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
+
+    return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+  }
+
+  /**
+   * 受講生コース情報を登録する際の初期設定をする。
    *
    * @param courseDetail 受講生コース詳細
-   * @param id 受講生ID
+   * @param studentId 受講生ID
    */
-  private void initCourseDetail(CourseDetail courseDetail,String id) {
+  private void initStudentCourse(CourseDetail courseDetail,String studentId) {
     StudentCourse studentCourse = courseDetail.getStudentCourse();
-    CourseApplication courseApplication = courseDetail.getCourseApplication();
     LocalDate now = LocalDate.now();
 
-    studentCourse.setStudentId(id);
+    studentCourse.setStudentId(studentId);
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
+  }
 
-    courseApplication.setStudentId(id);
-    courseApplication.setCourseId(studentCourse.getId());
+  /**
+   * 受講生コース申込状況を登録する際の初期設定をする。
+   *
+   * @param courseDetail 受講生コース詳細
+   * @param studentId 受講生ID
+   */
+  private void initCourseApplication(CourseDetail courseDetail,String studentId) {
+    CourseApplication courseApplication = courseDetail.getCourseApplication();
+
+    courseApplication.setStudentId(studentId);
+    courseApplication.setCourseId(courseDetail.getStudentCourse().getId());
     courseApplication.setStatus(ApplicationStatus.TEMP);
   }
 

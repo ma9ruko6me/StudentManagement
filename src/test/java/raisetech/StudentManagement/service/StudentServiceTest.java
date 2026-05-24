@@ -91,7 +91,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索＿全リポジトリが空でも受講生詳細が生成されること () {
+  void 受講生詳細の一覧検索_全リポジトリが空でも受講生詳細が生成されること () {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
     List<CourseApplication> courseApplicationList = new ArrayList<>();
@@ -231,8 +231,8 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の登録_初期値として設定される値が正しく設定されていること (){
     Student student = createStudent();
+    student.setId(null);
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setId("999");
     CourseApplication courseApplication = new CourseApplication();
     CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
     List<CourseDetail> courseDetailList = List.of(courseDetail);
@@ -267,6 +267,64 @@ class StudentServiceTest {
     doThrow(new  RuntimeException()).when(repository).registerStudent(student);
 
     assertThatThrownBy(() -> sut.registerStudent(studentDetail)).isInstanceOf(RuntimeException.class);
+  }
+
+  @Test
+  void 受講生コース詳細の追加_リポジトリの処理が適切に呼び出せていること (){
+    String id = "999";
+    Student student = new Student();
+    StudentCourse studentCourse = new StudentCourse();
+    CourseApplication courseApplication = new CourseApplication();
+    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
+
+    when(repository.searchStudent(id)).thenReturn(Optional.of(student));
+
+    sut.addCourseDetail(id, courseDetail);
+
+    verify(repository,times(1)).searchStudent(id);
+    verify(repository,times(1)).registerStudentCourse(studentCourse);
+    verify(repository,times(1)).registerCourseApplication(courseApplication);
+  }
+
+  @Test
+  void 受講生コース詳細の追加_正しい内容で保存されること(){
+    String id = "999";
+    Student student = new Student();
+    student.setId(id);
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setCourse("テストコース");
+    CourseApplication courseApplication = new CourseApplication();
+    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
+
+    when(repository.searchStudent(id)).thenReturn(Optional.of(student));
+
+    ArgumentCaptor<StudentCourse> studentCourseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
+    ArgumentCaptor<CourseApplication> courseApplicationCaptor = ArgumentCaptor.forClass(CourseApplication.class);
+
+    sut.addCourseDetail(id,courseDetail);
+
+    verify(repository,times(1)).searchStudent(id);
+
+    verify(repository,times(1)).registerStudentCourse(studentCourseCaptor.capture());
+    verify(repository,times(1)).registerCourseApplication(courseApplicationCaptor.capture());
+
+    assertThat(studentCourseCaptor.getValue().getStudentId()).isEqualTo(id);
+    assertThat(studentCourseCaptor.getValue().getCourse()).isEqualTo(studentCourse.getCourse());
+    assertThat(studentCourseCaptor.getValue().getStartDate()).isNotNull();
+    assertThat(studentCourseCaptor.getValue().getEndDate()).isNotNull();
+
+    assertThat(courseApplicationCaptor.getValue().getStudentId()).isEqualTo(student.getId());
+    assertThat(courseApplicationCaptor.getValue().getCourseId()).isEqualTo(studentCourseCaptor.getValue().getId());
+    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(ApplicationStatus.TEMP);
+  }
+
+  @Test
+  void 受講生コース詳細の追加_存在しない受講生IDでのコース追加で例外がサービスに伝播すること(){
+    String id = "999";
+    CourseDetail courseDetail = new CourseDetail();
+    when(repository.searchStudent(id)).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class, () -> sut.addCourseDetail(id, courseDetail));
   }
 
   @Test
