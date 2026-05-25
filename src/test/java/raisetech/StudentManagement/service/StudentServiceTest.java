@@ -51,9 +51,8 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の一覧検索_リポジトリとコンバーターの処理が適切に呼び出せていること () {
     Student student = createStudent();
-    StudentCourse studentCourse = createStudentCourse(student);
-    CourseApplication courseApplication = createCourseApplication(student,
-        studentCourse);
+    StudentCourse studentCourse = createStudentCourse(student.getId());
+    CourseApplication courseApplication = createCourseApplication(student.getId(), studentCourse.getId());
 
     List<Student> studentList = List.of(student);
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -122,8 +121,8 @@ class StudentServiceTest {
   void 受講生詳細の単一検索_リポジトリの処理が適切に呼び出せていること () {
     Student student = createStudent();
     String id = student.getId();
-    StudentCourse studentCourse = createStudentCourse(student);
-    CourseApplication courseApplication = createCourseApplication(student, studentCourse);
+    StudentCourse studentCourse = createStudentCourse(student.getId());
+    CourseApplication courseApplication = createCourseApplication(student.getId(), studentCourse.getId());
 
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     List<CourseApplication> courseApplicationList = List.of(courseApplication);
@@ -139,14 +138,14 @@ class StudentServiceTest {
     expected.setCourseDetailList(courseDetailList);
 
     when(repository.searchStudent(id)).thenReturn(Optional.of(student));
-    when(repository.searchStudentCourse(id)).thenReturn(studentCourseList);
+    when(repository.searchStudentCourseByStudentId(id)).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(courseApplicationList);
     when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
 
     StudentDetail actual = sut.searchStudent(id);
 
     verify(repository, times(1)).searchStudent(id);
-    verify(repository, times(1)).searchStudentCourse(id);
+    verify(repository, times(1)).searchStudentCourseByStudentId(id);
     verify(repository, times(1)).searchCourseApplicationByStudentId(id);
     verify(courseConverter, times(1)).convertCourseDetails(studentCourseList,courseApplicationList);
 
@@ -167,7 +166,7 @@ class StudentServiceTest {
   void 受講生詳細の単一検索_全リポジトリがからを返してもStudentDetailを返すこと (){
     String id = "999";
     when(repository.searchStudent(id)).thenReturn(Optional.of(new Student()));
-    when(repository.searchStudentCourse(id)).thenReturn(new ArrayList<>());
+    when(repository.searchStudentCourseByStudentId(id)).thenReturn(new ArrayList<>());
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(new ArrayList<>());
 
     StudentDetail actual = sut.searchStudent(id);
@@ -330,56 +329,158 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の更新_リポジトリの処理が適切に呼び出せていること () {
     Student student = new Student();
-    StudentCourse studentCourse = new StudentCourse();
-    CourseApplication courseApplication = new CourseApplication();
-    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
-    List<CourseDetail> courseDetailList = List.of(courseDetail);
-    StudentDetail studentDetail = new StudentDetail(student, courseDetailList);
 
-    sut.updateStudent(studentDetail);
+    sut.updateStudent(student);
 
-    verify(repository,times(1)).updateStudent(student);
-    verify(repository,times(1)).updateStudentCourse(studentCourse);
-    verify(repository,times(1)).updateCourseApplication(courseApplication);
+    verify(repository, times(1)).updateStudent(student);
   }
 
   @Test
-  void 受講生詳細の更新_正しい内容で保存されていること () {
-    Student student = createStudent();
-    StudentCourse studentCourse = createStudentCourse(student);
-    CourseApplication courseApplication = createCourseApplication(student, studentCourse);
-    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
-    List<CourseDetail> courseDetailList = List.of(courseDetail);
-    StudentDetail expected = new StudentDetail(student, courseDetailList);
+  void 受講生詳細の更新_正しい内容で更新されていること () {
+    Student expected = createStudent();
 
     ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
-    ArgumentCaptor<StudentCourse> studentCourseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
-    ArgumentCaptor<CourseApplication> courseApplicationCaptor = ArgumentCaptor.forClass(CourseApplication.class);
 
     sut.updateStudent(expected);
 
     verify(repository,times(1)).updateStudent(studentCaptor.capture());
-    verify(repository,times(1)).updateStudentCourse(studentCourseCaptor.capture());
-    verify(repository,times(1)).updateCourseApplication(courseApplicationCaptor.capture());
 
-    assertThat(studentCaptor.getValue().getId()).isEqualTo(expected.getStudent().getId());
-    assertThat(studentCaptor.getValue().getName()).isEqualTo(expected.getStudent().getName());
-    assertThat(studentCourseCaptor.getValue().getCourse()).isEqualTo(expected.getCourseDetailList().getFirst().getStudentCourse().getCourse());
-    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(expected.getCourseDetailList().getFirst().getCourseApplication().getStatus());
+    assertThat(studentCaptor.getValue().getId()).isEqualTo(expected.getId());
+    assertThat(studentCaptor.getValue().getName()).isEqualTo(expected.getName());
   }
 
   @Test
   void 受講生詳細の更新_リポジトリで発生した例外がサービスに伝播すること(){
     Student student = new Student();
-    StudentCourse studentCourse = new StudentCourse();
-    CourseApplication courseApplication = new CourseApplication();
-    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
-    List<CourseDetail> courseDetailList = List.of(courseDetail);
-    StudentDetail studentDetail = new StudentDetail(student, courseDetailList);
 
     doThrow(new  RuntimeException()).when(repository).updateStudent(student);
 
-    assertThatThrownBy(() -> sut.updateStudent(studentDetail)).isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(() -> sut.updateStudent(student)).isInstanceOf(RuntimeException.class);
+  }
+
+  @Test
+  void 受講生コース詳細の更新_リポジトリの処理が適切に呼び出せていること(){
+    String id = "999";
+    StudentCourse studentCourse = createStudentCourse(id);
+    CourseApplication courseApplication = createCourseApplication(id,studentCourse.getId());
+
+    CourseApplication nextCourseApplication = new CourseApplication();
+    nextCourseApplication.setId(courseApplication.getId());
+    nextCourseApplication.setStudentId(courseApplication.getStudentId());
+    nextCourseApplication.setCourseId(courseApplication.getCourseId());
+    nextCourseApplication.setStatus(ApplicationStatus.FORMAL);
+
+    CourseDetail courseDetail = new CourseDetail(studentCourse, nextCourseApplication);
+
+
+    when(repository.searchStudentCourseByCourseId(studentCourse.getId())).thenReturn(Optional.of(studentCourse));
+    when(repository.searchCourseApplicationByCourseId(studentCourse.getId())).thenReturn(Optional.of(courseApplication));
+
+    sut.updateCourseDetail(courseDetail);
+
+    verify(repository,times(1)).searchStudentCourseByCourseId(studentCourse.getId());
+    verify(repository,times(1)).searchCourseApplicationByCourseId(studentCourse.getId());
+    verify(repository,times(1)).updateStudentCourse(studentCourse);
+    verify(repository,times(1)).updateCourseApplication(nextCourseApplication);
+  }
+
+  @Test
+  void 受講生コース詳細の更新_正しい内容で更新されていること(){
+    String id = "999";
+    StudentCourse studentCourse = createStudentCourse(id);
+    CourseApplication courseApplication = createCourseApplication(id,studentCourse.getId());
+
+    StudentCourse nextStudentCourse = new StudentCourse();
+    nextStudentCourse.setId(studentCourse.getId());
+    nextStudentCourse.setStudentId(studentCourse.getStudentId());
+    nextStudentCourse.setCourse("テスト大変");
+    nextStudentCourse.setStartDate(studentCourse.getStartDate());
+    nextStudentCourse.setEndDate(studentCourse.getEndDate());
+
+    CourseApplication nextCourseApplication = new CourseApplication();
+    nextCourseApplication.setId(courseApplication.getId());
+    nextCourseApplication.setStudentId(courseApplication.getStudentId());
+    nextCourseApplication.setCourseId(courseApplication.getCourseId());
+    nextCourseApplication.setStatus(ApplicationStatus.FORMAL);
+
+    CourseDetail courseDetail = new CourseDetail(nextStudentCourse, nextCourseApplication);
+
+    ArgumentCaptor<StudentCourse> studentCourseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
+    ArgumentCaptor<CourseApplication> courseApplicationCaptor = ArgumentCaptor.forClass(CourseApplication.class);
+
+    when(repository.searchStudentCourseByCourseId(studentCourse.getId())).thenReturn(Optional.of(studentCourse));
+    when(repository.searchCourseApplicationByCourseId(studentCourse.getId())).thenReturn(Optional.of(courseApplication));
+
+    sut.updateCourseDetail(courseDetail);
+
+    verify(repository,times(1)).updateStudentCourse(studentCourseCaptor.capture());
+    verify(repository,times(1)).updateCourseApplication(courseApplicationCaptor.capture());
+
+    assertThat(studentCourseCaptor.getValue()).satisfies(course ->  {
+      assertThat(course.getId()).isEqualTo(nextStudentCourse.getId());
+      assertThat(course.getCourse()).isNotEqualTo(studentCourse.getCourse());
+      assertThat(course.getCourse()).isEqualTo(nextStudentCourse.getCourse());
+    });
+
+    assertThat(courseApplicationCaptor.getValue()).satisfies(application ->  {
+      assertThat(application).isNotSameAs(nextStudentCourse);
+      assertThat(application.getId()).isEqualTo(nextCourseApplication.getId());
+      assertThat(application.getStatus()).isNotEqualTo(courseApplication.getStatus());
+      assertThat(application.getStatus()).isEqualTo(nextCourseApplication.getStatus());
+    });
+  }
+
+  @Test
+  void 受講生コース詳細の更新_受講生コースが存在しないときに例外がサービスに伝播すること(){
+    String id = "999";
+
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId(id);
+
+    CourseDetail courseDetail = new CourseDetail();
+    courseDetail.setStudentCourse(studentCourse);
+
+    when(repository.searchStudentCourseByCourseId(id)).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class, () -> sut.updateCourseDetail(courseDetail));
+  }
+
+  @Test
+  void 受講生コース詳細の更新_受講生コース申込状況が存在しないときに例外がサービスに伝播すること(){
+    String id = "999";
+
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId(id);
+
+    CourseApplication courseApplication = new CourseApplication();
+    courseApplication.setCourseId(id);
+
+    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
+
+    when(repository.searchStudentCourseByCourseId(id)).thenReturn(Optional.of(studentCourse));
+    when(repository.searchCourseApplicationByCourseId(id)).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class, () -> sut.updateCourseDetail(courseDetail));
+  }
+
+  @Test
+  void 受講生コース詳細の更新_不正なStatusの遷移で例外が発生すること(){
+    String id = "999";
+    StudentCourse studentCourse = createStudentCourse(id);
+    CourseApplication courseApplication = createCourseApplication(id,studentCourse.getId());
+
+    CourseApplication nextCourseApplication = new CourseApplication();
+    nextCourseApplication.setId(courseApplication.getId());
+    nextCourseApplication.setStudentId(courseApplication.getStudentId());
+    nextCourseApplication.setCourseId(courseApplication.getCourseId());
+    nextCourseApplication.setStatus(ApplicationStatus.COMPLETED);
+
+    CourseDetail courseDetail = new CourseDetail(studentCourse, nextCourseApplication);
+
+    when(repository.searchStudentCourseByCourseId(studentCourse.getId())).thenReturn(Optional.of(studentCourse));
+    when(repository.searchCourseApplicationByCourseId(studentCourse.getId())).thenReturn(Optional.of(courseApplication));
+
+    assertThrows(IllegalStateException.class, () -> sut.updateCourseDetail(courseDetail));
   }
 
   @Nonnull
@@ -398,10 +499,10 @@ class StudentServiceTest {
   }
 
   @Nonnull
-  private static StudentCourse createStudentCourse(Student student) {
+  private static StudentCourse createStudentCourse(String studentId) {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
-    studentCourse.setStudentId(student.getId());
+    studentCourse.setStudentId(studentId);
     studentCourse.setCourse("テストコース");
     studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
     studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
@@ -409,12 +510,12 @@ class StudentServiceTest {
   }
 
   @Nonnull
-  private static CourseApplication createCourseApplication(Student student,
-      StudentCourse studentCourse) {
+  private static CourseApplication createCourseApplication(String studentId,
+      String studentCourseId) {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setId("1");
-    courseApplication.setStudentId(student.getId());
-    courseApplication.setCourseId(studentCourse.getId());
+    courseApplication.setStudentId(studentId);
+    courseApplication.setCourseId(studentCourseId);
     courseApplication.setStatus(ApplicationStatus.TEMP);
     return courseApplication;
   }

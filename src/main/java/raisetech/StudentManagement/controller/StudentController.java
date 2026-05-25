@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.TestException;
@@ -79,16 +80,28 @@ public class StudentController {
   }
 
   /**
-   * 受講生詳細の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
+   * 受講生の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
    *
-   * @param studentDetail 受講生詳細
+   * @param student 受講生
    * @return　実行結果
    */
   @Operation(summary = "受講生更新", description = "受講生を更新します。")
   @PutMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
-    service.updateStudent(studentDetail);
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid Student student) {
+    service.updateStudent(student);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  /**
+   * 受講生コース詳細の更新を行います。
+   *
+   * @param courseDetail 受講生詳細
+   * @return　実行結果
+   */
+  @PutMapping("/updateCourseDetail")
+  public ResponseEntity<String> updateCourseDetail(@RequestBody @Valid CourseDetail courseDetail) {
+    service.updateCourseDetail(courseDetail);
+    return ResponseEntity.ok("コース詳細を更新しました。");
   }
 
   /**

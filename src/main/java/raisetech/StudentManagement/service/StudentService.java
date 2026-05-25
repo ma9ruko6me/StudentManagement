@@ -2,6 +2,7 @@ package raisetech.StudentManagement.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,7 @@ public class StudentService {
   public StudentDetail searchStudent(String id) {
     Student student = repository.searchStudent(id)
         .orElseThrow(() -> new RuntimeException("Student not found" + id));
-    List<StudentCourse> studentCourseList = repository.searchStudentCourse(id);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
     return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
   }
@@ -90,7 +91,7 @@ public class StudentService {
    *
    * @param id 受講生ID
    * @param courseDetail 受講生コース詳細
-   * @return　登録情報を付与した受講生詳細
+   * @return　新しく受講生コース詳細を追加した受講生詳細
    */
   @Transactional
   public StudentDetail addCourseDetail(String id, CourseDetail courseDetail) {
@@ -102,7 +103,7 @@ public class StudentService {
     initCourseApplication(courseDetail,id);
     repository.registerCourseApplication(courseDetail.getCourseApplication());
 
-    List<StudentCourse> studentCourseList = repository.searchStudentCourse(id);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
 
     return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
@@ -138,18 +139,40 @@ public class StudentService {
   }
 
   /**
-   * 受講生詳細の更新を行います。 受講生、受講生コース情報、受講生コース申込状況をそれぞれ更新します。
+   * 受講生の更新を行います。
    *
-   * @param studentDetail 受講生詳細
+   * @param student 受講生
    */
   @Transactional
-  public void updateStudent(StudentDetail studentDetail) {
-    repository.updateStudent(studentDetail.getStudent());
-    studentDetail.getCourseDetailList()
-        .forEach(courseDetail -> {
-          repository.updateStudentCourse(courseDetail.getStudentCourse());
-          repository.updateCourseApplication(courseDetail.getCourseApplication());
-        });
+  public void updateStudent(Student student) {
+    repository.updateStudent(student);
   }
 
+  /**
+   * 受講生コース詳細の更新を行います。受講生コース情報、受講生コース申込状況をそれぞれ更新します。
+   *
+   * @param courseDetail 受講生コース詳細
+   */
+  @Transactional
+  public void updateCourseDetail(CourseDetail courseDetail) {
+    String courseId = courseDetail.getStudentCourse().getId();
+    Optional<StudentCourse> studentCourse = repository.searchStudentCourseByCourseId(
+        courseId);
+    if (studentCourse.isEmpty()) {
+      throw new RuntimeException("Student not found" + courseId);
+    }
+
+    CourseApplication courseApplication = repository.searchCourseApplicationByCourseId(courseId)
+        .orElseThrow(() -> new RuntimeException("Student not found" + courseId));
+
+    ApplicationStatus currentStatus = courseApplication.getStatus();
+    ApplicationStatus nextStatus = courseDetail.getCourseApplication().getStatus();
+
+    if (!currentStatus.canTransitionTo(nextStatus)) {
+      throw new IllegalStateException("不正なステータス遷移");
+    }
+
+    repository.updateStudentCourse(courseDetail.getStudentCourse());
+    repository.updateCourseApplication(courseDetail.getCourseApplication());
+  }
 }

@@ -18,9 +18,14 @@
     SELECT * FROM students_courses
   </select>
 
-  <!-- 受講生コース情報の検索 -->
-  <select id="searchStudentCourse" resultType="raisetech.StudentManagement.data.StudentCourse">
-    SELECT * FROM students_courses WHERE student_id = #{id}
+  <!-- 受講生IDに紐づく受講生コース情報の検索 -->
+  <select id="searchStudentCourseByStudentId" resultType="raisetech.StudentManagement.data.StudentCourse">
+    SELECT * FROM students_courses WHERE student_id = #{studentId}
+  </select>
+
+  <!-- 受講生コースIDに紐づく受講生コース情報の検索 -->
+  <select id="searchStudentCourseByCourseId" resultType="raisetech.StudentManagement.data.StudentCourse">
+    SELECT * FROM students_courses WHERE id = #{courseId}
   </select>
 
   <!--受講生コースの申込状況の全件検索-->
@@ -28,9 +33,14 @@
     SELECT * FROM course_applications
   </select>
 
-  <!--受講生コースの申込状況の検索-->
+  <!--受講生IDに紐づく受講生コースの申込状況の検索-->
   <select id="searchCourseApplicationByStudentId" resultType="raisetech.StudentManagement.data.CourseApplication">
-    SELECT * FROM course_applications WHERE student_id = #{id}
+    SELECT * FROM course_applications WHERE student_id = #{studentId}
+  </select>
+
+  <!--受講生コースIDに紐づく受講生コースの申込状況の検索-->
+  <select id="searchCourseApplicationByCourseId" resultType="raisetech.StudentManagement.data.CourseApplication">
+    SELECT * FROM course_applications WHERE course_id = #{courseId}
   </select>
 
   <!-- 受講生の登録 -->

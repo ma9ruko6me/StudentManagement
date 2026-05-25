@@ -2,6 +2,7 @@ package raisetech.StudentManagement.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -168,11 +169,10 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の更新が実行できて空で返ってくること() throws Exception {
+  void 受講生の更新が実行できること() throws Exception {
     mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
             """
                     {
-                       "student": {
                          "id": "2",
                          "name": "久保建英",
                          "hurigana": "くぼたけふさ",
@@ -182,24 +182,6 @@ class StudentControllerTest {
                          "age": 23,
                          "gender": "男性",
                          "remark": ""
-                       },
-                       "courseDetailList": [
-                         {
-                           "studentCourse": {
-                             "id": "6",
-                             "studentId": "2",
-                             "course": "デザインコース",
-                             "startDate": "2025-10-07",
-                             "endDate": "2026-06-23"
-                           },
-                           "courseApplication": {
-                             "id": "6",
-                             "studentId": "6",
-                             "courseId": "6",
-                             "status": "FORMAL"
-                           }
-                         }
-                       ]
                      }
                 """
         ))
@@ -207,6 +189,31 @@ class StudentControllerTest {
         .andExpect(content().string("更新処理が成功しました。"));
 
     verify(service, times(1)).updateStudent(any());
+  }
+
+  @Test
+  void 受講生コース詳細の更新が実行できること() throws Exception {
+    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                  {"studentCourse": {
+                  "id": "6",
+                  "studentId": "2",
+                  "course": "デザインコース",
+                  "startDate": "2025-10-07",
+                  "endDate": "2026-06-23"
+                },
+                "courseApplication": {
+                  "id": "6",
+                  "studentId": "2",
+                  "courseId": "6",
+                  "status": "FORMAL"
+                }}
+                """
+    ))
+        .andExpect(status().isOk())
+        .andExpect(content().string("コース詳細を更新しました。"));
+
+    verify(service, times(1)).updateCourseDetail(any());
   }
 
   @Test

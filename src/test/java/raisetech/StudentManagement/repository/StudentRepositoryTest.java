@@ -28,7 +28,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生の単一検索ができること() {
+  void 受講生の検索ができること() {
     String id = "1";
     Optional<Student> actual = sut.searchStudent(id);
     assertThat(actual)
@@ -42,7 +42,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生の単一検索で存在しないIDの場合はOptionalが空で返ってくること() {
+  void 受講生の検索で存在しないIDの場合はOptionalが空で返ってくること() {
     String id = "999";
     Optional<Student> actual = sut.searchStudent(id);
     assertThat(actual).isEmpty();
@@ -57,14 +57,35 @@ class StudentRepositoryTest {
   @Test
   void 受講生IDに紐づく受講生コース情報の検索ができること() {
     String id = "3";
-    List<StudentCourse> actual = sut.searchStudentCourse(id);
+    List<StudentCourse> actual = sut.searchStudentCourseByStudentId(id);
     assertThat(actual.size()).isEqualTo(3);
   }
 
   @Test
   void 存在しない受講生IDに紐づく受講生コース情報の検索で空のリストが返ってくること() {
     String id = "999";
-    List<StudentCourse> actual = sut.searchStudentCourse(id);
+    List<StudentCourse> actual = sut.searchStudentCourseByStudentId(id);
+    assertThat(actual).isEmpty();
+  }
+
+  @Test
+  void 受講生コースIDに紐づく受講生コース情報の検索ができること(){
+    String id = "1";
+    Optional<StudentCourse> actual = sut.searchStudentCourseByCourseId(id);
+    assertThat(actual)
+        .isPresent()
+        .get()
+        .satisfies(studentCourse -> {
+          assertThat(studentCourse.getId()).isEqualTo(id);
+          assertThat(studentCourse.getStudentId()).isEqualTo("1");
+          assertThat(studentCourse.getCourse()).isEqualTo("Javaコース");
+        });
+  }
+
+  @Test
+  void 存在しない受講生コースIDに紐づく受講生コース情報の検索でOptionalが空で返ってくること() {
+    String id = "999";
+    Optional<StudentCourse> actual = sut.searchStudentCourseByCourseId(id);
     assertThat(actual).isEmpty();
   }
 
@@ -100,9 +121,31 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 存在しない受講生IDに紐づく受講生コース申込状況の検索でnullが返ってくること() {
+  void 存在しない受講生IDに紐づく受講生コース申込状況の検索で空のリストが返ってくること() {
     String id = "999";
     List<CourseApplication> actual = sut.searchCourseApplicationByStudentId(id);
+    assertThat(actual).isEmpty();
+  }
+
+  @Test
+  void 受講生コースIDに紐づく受講生コース申込状況の検索ができること(){
+    String id = "1";
+    Optional<CourseApplication> actual = sut.searchCourseApplicationByCourseId(id);
+    assertThat(actual)
+        .isPresent()
+        .get()
+        .satisfies(courseApplication -> {
+          assertThat(courseApplication.getId()).isEqualTo(id);
+          assertThat(courseApplication.getStudentId()).isEqualTo("1");
+          assertThat(courseApplication.getCourseId()).isEqualTo("1");
+          assertThat(courseApplication.getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
+        });
+  }
+
+  @Test
+  void 存在しない受講生コースIDに紐づく受講生コース申込状況の検索でOptionalが空で返ってくること() {
+    String id = "999";
+    Optional<CourseApplication> actual = sut.searchCourseApplicationByCourseId(id);
     assertThat(actual).isEmpty();
   }
 
@@ -251,7 +294,7 @@ class StudentRepositoryTest {
   void 受講生コース情報の更新ができること() {
     String id = "1";
 
-    StudentCourse before = sut.searchStudentCourse(id).get(0);
+    StudentCourse before = sut.searchStudentCourseByStudentId(id).get(0);
 
     StudentCourse expected = new StudentCourse();
     expected.setId(before.getId());
@@ -262,7 +305,7 @@ class StudentRepositoryTest {
 
     sut.updateStudentCourse(expected);
 
-    List<StudentCourse> actual = sut.searchStudentCourse(id);
+    List<StudentCourse> actual = sut.searchStudentCourseByStudentId(id);
 
     assertThat(actual)
         .anySatisfy(studentCourse -> {

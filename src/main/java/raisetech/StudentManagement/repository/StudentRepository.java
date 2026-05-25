@@ -38,10 +38,18 @@ public interface StudentRepository {
   /**
    * 受講生IDに紐づく受講生コース情報を検索します。
    *
-   * @param id 受講生ID
+   * @param studentId 受講生ID
    * @return　受講生IDに紐づく受講生コース情報
    */
-  List<StudentCourse> searchStudentCourse(String id);
+  List<StudentCourse> searchStudentCourseByStudentId(String studentId);
+
+  /**
+   * 受講生コースIDに紐づく受講生コース情報を検索します。
+   *
+   * @param courseId 受講生コースID
+   * @return　受講生コースIDに紐づく受講生コース情報
+   */
+  Optional<StudentCourse>searchStudentCourseByCourseId(String courseId);
 
   /**
    * 受講生コース申込状況の全件検索を行います。
@@ -53,10 +61,18 @@ public interface StudentRepository {
   /**
    * 受講生IDに紐づく受講生コース申込状況を検索します。
    *
-   * @param id 受講生ID
+   * @param studentId 受講生ID
    * @return　受講生IDに紐づく受講生コース申込状況
    */
-  List<CourseApplication> searchCourseApplicationByStudentId(String id);
+  List<CourseApplication> searchCourseApplicationByStudentId(String studentId);
+
+  /**
+   * 受講生IDに紐づく受講生コース申込状況を検索します。
+   *
+   * @param courseId 受講生コースID
+   * @return　受講生コースIDに紐づく受講生コース申込状況
+   */
+  Optional<CourseApplication> searchCourseApplicationByCourseId(String courseId);
 
   /**
    * 受講生を新規登録します。 IDに関しては自動採番を行う。
