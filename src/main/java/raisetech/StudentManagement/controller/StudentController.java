@@ -2,9 +2,9 @@ package raisetech.StudentManagement.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.StudentManagement.data.Student;
+import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
@@ -38,9 +40,7 @@ public class StudentController {
    */
   @Operation(summary = "受講生一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.searchStudentList();
-  }
+  public List<StudentDetail> getStudentList() {return service.searchStudentList();}
 
   /**
    * 受講生詳細の検索です。 IDに紐づく任意の受講生情報を取得します。
@@ -50,8 +50,8 @@ public class StudentController {
    */
   @Operation(summary = "受講生検索", description = "受講生を検索します。")
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable String id) {
-    return service.searchStudent(id);
+  public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
+    return ResponseEntity.ok(service.searchStudent(id));
   }
 
   /**
@@ -62,26 +62,57 @@ public class StudentController {
    */
   @Operation(summary = "受講生登録", description = "受講生を登録します。")
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(
-      @RequestBody @Valid StudentDetail studentDetail) {
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseStudentDetail);
+  }
+
+  /**
+   * 受講生コース詳細の追加を行います。
+   *
+   * @param id 受講生ID
+   * @param courseDetail 受講生詳細
+   * @return　実行結果
+   */
+  @Operation(summary = "受講生コース詳細追加", description = "受講生コース詳細を追加します。")
+  @PostMapping("/addCourse/{id}")
+  public ResponseEntity<StudentDetail> addCourseDetail(@PathVariable String id, @RequestBody @Valid CourseDetail courseDetail) {
+    StudentDetail responseStudentDetail = service.addCourseDetail(id, courseDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
 
   /**
-   * 受講生詳細の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
+   * 受講生の更新を行います。 キャンセルフラグの更新もここで行います。（論理削除）
    *
-   * @param studentDetail 受講生詳細
+   * @param student 受講生
    * @return　実行結果
    */
   @Operation(summary = "受講生更新", description = "受講生を更新します。")
   @PutMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
-    service.updateStudent(studentDetail);
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid Student student) {
+    service.updateStudent(student);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
 
-  @Operation(summary = "例外処理", description = "例外を発生させます。")
+  /**
+   * 受講生コース詳細の更新を行います。
+   *
+   * @param courseDetail 受講生詳細
+   * @return　実行結果
+   */
+  @PutMapping("/updateCourseDetail")
+  public ResponseEntity<String> updateCourseDetail(@RequestBody @Valid CourseDetail courseDetail) {
+    service.updateCourseDetail(courseDetail);
+    return ResponseEntity.ok("コース詳細を更新しました。");
+  }
+
+  /**
+   * テスト用に例外を発生させるAPIです。
+   * グローバル例外ハンドリングやエラーレスポンスの動作確認を目的としています。
+   *
+   * @throws TestException 常にスローされる例外
+   */
+  @Operation(summary = "例外発生テスト", description = "例外を意図的に発生させ、エラーハンドリングを確認します。")
   @GetMapping("/testException")
   public List<StudentDetail> testException() throws TestException {
     throw new TestException("これは例外を発生させるAPIです。");

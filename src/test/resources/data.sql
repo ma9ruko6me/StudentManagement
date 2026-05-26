@@ -17,3 +17,15 @@ VALUES
     (4, 'AWSコース', '2026-02-14 00:00:00', '2027-02-14 00:00:00'),
     (4, '英会話コース', '2026-02-15 00:00:00', '2027-02-15 00:00:00'),
     (5, 'WPコース', '2026-02-16 00:00:00', '2027-02-16 00:00:00');
+
+INSERT INTO course_applications (student_id,course_id,status)
+VALUES
+    (1,1,'IN_PROGRESS'),
+    (2,2,'COMPLETED'),
+    (2,3,'TEMP'),
+    (3,4,'COMPLETED'),
+    (3,5,'IN_PROGRESS'),
+    (3,6,'FORMAL'),
+    (4,7,'COMPLETED'),
+    (4,8,'FORMAL'),
+    (5,9,'TEMP');
