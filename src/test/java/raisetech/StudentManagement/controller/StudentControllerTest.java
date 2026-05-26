@@ -2,7 +2,8 @@ package raisetech.StudentManagement.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
+import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
@@ -50,7 +53,7 @@ class StudentControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
-    verify(service, times(1)).searchStudentlList();
+    verify(service, times(1)).searchStudentList();
   }
 
   @Test
@@ -59,7 +62,7 @@ class StudentControllerTest {
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setStudent(student);
     List<StudentDetail> studentDetailList = List.of(studentDetail);
-    when(service.searchStudentlList()).thenReturn(studentDetailList);
+    when(service.searchStudentList()).thenReturn(studentDetailList);
 
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
@@ -83,9 +86,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の検索で存在しないIDを検索したときにNotFoundが返ってくること() throws Exception {
+  void 受講生詳細の検索で存在しないIDを検索したときに404が返ってくること() throws Exception {
     String id = "999";
-    when(service.searchStudent(id)).thenThrow(new RuntimeException("Student not found"));
+    when(service.searchStudent(id)).thenThrow(new ResourceNotFoundException("Student not found"));
 
     mockMvc.perform(get("/student/{id}", id))
         .andExpect(status().isNotFound());
@@ -118,7 +121,7 @@ class StudentControllerTest {
                     }
                 """
         ))
-        .andExpect(status().isOk());
+        .andExpect(status().isCreated());
 
     ArgumentCaptor<StudentDetail> studentDetailArgumentCaptor = ArgumentCaptor.forClass(StudentDetail.class);
 
@@ -160,11 +163,14 @@ class StudentControllerTest {
   }
 
   @Test
-  void 存在しない受講生IDに紐づく受講生コース詳細の追加でNotFoundが返ってくること() throws Exception {
-    String id = "999";
-    when(service.searchStudent(id)).thenThrow(new RuntimeException("Student not found"));
+  void 存在しない受講生IDに紐づく受講生コース詳細の追加で404が返ってくること() throws Exception {
+    doThrow(new ResourceNotFoundException("Student not found"))
+        .when(service).addCourseDetail(eq("999"),any(CourseDetail.class));
 
-    mockMvc.perform(post("/addCourse/999"))
+    mockMvc.perform(post("/addCourse/999").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"studentCourse": {"course": "デザインコース"}}
+                """))
         .andExpect(status().isNotFound());
   }
 
@@ -192,6 +198,26 @@ class StudentControllerTest {
   }
 
   @Test
+  void 存在しない受講生の更新で404が返ってくること() throws Exception {
+    doThrow(new ResourceNotFoundException("Student not found")).when(service).updateStudent(any());
+
+    mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content("""
+              {
+                "id": "2",
+                "name": "久保建英",
+                "hurigana": "くぼたけふさ",
+                "nickname": "タケ",
+                "email": "take.kubo@example.com",
+                "area": "神奈川県",
+                "age": 23,
+                "gender": "男性",
+                "remark": ""
+              }
+            """))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   void 受講生コース詳細の更新が実行できること() throws Exception {
     mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -208,12 +234,51 @@ class StudentControllerTest {
                   "courseId": "6",
                   "status": "FORMAL"
                 }}
-                """
-    ))
+                """))
         .andExpect(status().isOk())
         .andExpect(content().string("コース詳細を更新しました。"));
 
     verify(service, times(1)).updateCourseDetail(any());
+  }
+
+  @Test
+  void 存在しない受講生コースの更新で404が返ってくること() throws Exception {
+    doThrow(new ResourceNotFoundException("Course not found")).when(service).updateCourseDetail(any());
+
+    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+              {
+                 "studentCourse": {
+                    "id": "6",
+                    "course": "デザインコース"
+                 },
+                 "courseApplication": {
+                    "id": "6",
+                    "status": "FORMAL"
+                 }
+              }
+            """))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 不正なステータス遷移で409が返ってくること() throws Exception {
+    doThrow(new InvalidStatusTransitionException("Invalid status transition")).when(service).updateCourseDetail(any());
+
+    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON).content("""
+              {
+                 "studentCourse": {
+                    "id": "6",
+                    "course": "デザインコース"
+                 },
+                 "courseApplication": {
+                    "id": "6",
+                    "status": "FORMAL"
+                 }
+              }
+            """))
+        .andDo(print())
+        .andExpect(status().isConflict());
   }
 
   @Test
@@ -224,8 +289,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生で名前が正しく入力された時に入力チェックに異常が発生しないこと()
-      throws Exception {
+  void 受講生詳細の受講生で名前が正しく入力された時に入力チェックに異常が発生しないこと() throws Exception {
     Student student = createStudent();
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);

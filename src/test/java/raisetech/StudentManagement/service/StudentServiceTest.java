@@ -28,6 +28,8 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
+import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +79,7 @@ class StudentServiceTest {
     when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
-    List<StudentDetail> actual = sut.searchStudentlList();
+    List<StudentDetail> actual = sut.searchStudentList();
 
     verify(repository, times(1)).search();
     verify(repository, times(1)).searchStudentCourseList();
@@ -105,7 +107,7 @@ class StudentServiceTest {
     when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
-    List<StudentDetail> actual = sut.searchStudentlList();
+    List<StudentDetail> actual = sut.searchStudentList();
 
     verify(repository, times(1)).search();
     verify(repository, times(1)).searchStudentCourseList();
@@ -159,11 +161,13 @@ class StudentServiceTest {
 
     when(repository.searchStudent(id)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(()->sut.searchStudent(id)).isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(()->sut.searchStudent(id))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining(id);
   }
 
   @Test
-  void 受講生詳細の単一検索_全リポジトリがからを返してもStudentDetailを返すこと (){
+  void 受講生詳細の単一検索_全リポジトリが空を返してもStudentDetailを返すこと (){
     String id = "999";
     when(repository.searchStudent(id)).thenReturn(Optional.of(new Student()));
     when(repository.searchStudentCourseByStudentId(id)).thenReturn(new ArrayList<>());
@@ -174,14 +178,6 @@ class StudentServiceTest {
     assertThat(actual).isNotNull();
     assertThat(actual.getStudent()).isNotNull();
     assertThat(actual.getCourseDetailList()).isEmpty();
-  }
-
-  @Test
-  void 受講生詳細の単一検索_リポジトリが例外を投げた場合はそのまま伝播すること () {
-    String id = "999";
-    when(repository.searchStudent(id)).thenThrow(new RuntimeException());
-
-    assertThrows(RuntimeException.class, () -> sut.searchStudent(id));
   }
 
   @Test
@@ -255,17 +251,15 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の登録_リポジトリで発生した例外がサービスに伝播すること(){
-    Student student = new Student();
-    StudentCourse studentCourse = new StudentCourse();
-    CourseApplication courseApplication = new CourseApplication();
-    CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
-    List<CourseDetail> courseDetailList = List.of(courseDetail);
-    StudentDetail studentDetail = new StudentDetail(student, courseDetailList);
+  void 受講生詳細の登録_StudentDetailがnullの場合例外が発生すること (){
+    assertThatThrownBy(()->sut.registerStudent(null)).isInstanceOf(IllegalArgumentException.class);
+  }
 
-    doThrow(new  RuntimeException()).when(repository).registerStudent(student);
+  @Test
+  void 受講生詳細の登録_Studentがnullの場合例外が発生すること(){
+    StudentDetail studentDetail = new StudentDetail(null,List.of());
 
-    assertThatThrownBy(() -> sut.registerStudent(studentDetail)).isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(()->sut.registerStudent(studentDetail)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -318,26 +312,33 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生コース詳細の追加_存在しない受講生IDでのコース追加で例外がサービスに伝播すること(){
+  void 受講生コース詳細の追加_存在しない受講生IDでのコース追加で例外が発生すること(){
     String id = "999";
-    CourseDetail courseDetail = new CourseDetail();
     when(repository.searchStudent(id)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> sut.addCourseDetail(id, courseDetail));
+    assertThatThrownBy(()->sut.addCourseDetail(id, new CourseDetail()))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining(id);
   }
 
   @Test
-  void 受講生詳細の更新_リポジトリの処理が適切に呼び出せていること () {
+  void 受講生の更新_リポジトリの処理が適切に呼び出せていること () {
     Student student = new Student();
+    student.setId("999");
+
+    when(repository.searchStudent(student.getId())).thenReturn(Optional.of(student));
 
     sut.updateStudent(student);
 
+    verify(repository,times(1)).searchStudent(student.getId());
     verify(repository, times(1)).updateStudent(student);
   }
 
   @Test
-  void 受講生詳細の更新_正しい内容で更新されていること () {
+  void 受講生の更新_正しい内容で更新されていること () {
     Student expected = createStudent();
+
+    when(repository.searchStudent(expected.getId())).thenReturn(Optional.of(expected));
 
     ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
 
@@ -350,12 +351,13 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の更新_リポジトリで発生した例外がサービスに伝播すること(){
-    Student student = new Student();
+  void 受講生の更新_存在しない受講生の更新で例外が発生すること(){
+    String id = "999";
+    when(repository.searchStudent(id)).thenReturn(Optional.empty());
 
-    doThrow(new  RuntimeException()).when(repository).updateStudent(student);
-
-    assertThatThrownBy(() -> sut.updateStudent(student)).isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(()->sut.addCourseDetail(id, new CourseDetail()))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining(id);
   }
 
   @Test
@@ -431,7 +433,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生コース詳細の更新_受講生コースが存在しないときに例外がサービスに伝播すること(){
+  void 受講生コース詳細の更新_存在しない受講生コースの更新で例外が発生すること(){
     String id = "999";
 
     StudentCourse studentCourse = new StudentCourse();
@@ -442,11 +444,11 @@ class StudentServiceTest {
 
     when(repository.searchStudentCourseByCourseId(id)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> sut.updateCourseDetail(courseDetail));
+    assertThrows(ResourceNotFoundException.class, () -> sut.updateCourseDetail(courseDetail));
   }
 
   @Test
-  void 受講生コース詳細の更新_受講生コース申込状況が存在しないときに例外がサービスに伝播すること(){
+  void 受講生コース詳細の更新_存在しない受講生コース申込状況の更新で例外が発生すること(){
     String id = "999";
 
     StudentCourse studentCourse = new StudentCourse();
@@ -460,7 +462,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseByCourseId(id)).thenReturn(Optional.of(studentCourse));
     when(repository.searchCourseApplicationByCourseId(id)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> sut.updateCourseDetail(courseDetail));
+    assertThrows(ResourceNotFoundException.class, () -> sut.updateCourseDetail(courseDetail));
   }
 
   @Test
@@ -480,7 +482,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseByCourseId(studentCourse.getId())).thenReturn(Optional.of(studentCourse));
     when(repository.searchCourseApplicationByCourseId(studentCourse.getId())).thenReturn(Optional.of(courseApplication));
 
-    assertThrows(IllegalStateException.class, () -> sut.updateCourseDetail(courseDetail));
+    assertThrows(InvalidStatusTransitionException.class, () -> sut.updateCourseDetail(courseDetail));
   }
 
   @Nonnull

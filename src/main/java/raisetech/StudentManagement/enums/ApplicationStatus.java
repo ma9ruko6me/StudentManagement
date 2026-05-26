@@ -25,6 +25,7 @@ public enum ApplicationStatus {
     FORMAL.nextStatuses = List.of(TEMP,IN_PROGRESS,CANCEL);
     IN_PROGRESS.nextStatuses = List.of(FORMAL,COMPLETED,CANCEL);
     COMPLETED.nextStatuses = List.of(IN_PROGRESS);
+    CANCEL.nextStatuses = List.of();
   }
 
   public boolean canTransitionTo(ApplicationStatus next) {

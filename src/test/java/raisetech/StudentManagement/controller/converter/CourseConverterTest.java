@@ -55,7 +55,7 @@ class CourseConverterTest {
   }
 
   @Test
-  void 受講生コース情報のリストとそれに紐づかない受講生コース申込状況のリストを渡して受講生申込状況が除外された受講生コース詳細のリストが作成できること () {
+  void 受講生コース情報のリストに紐づかない受講生コース申込状況のリストは結果に含まれないこと () {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setStudentId("1");

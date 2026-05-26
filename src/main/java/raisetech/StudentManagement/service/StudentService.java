@@ -14,6 +14,8 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
+import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 /**
@@ -38,7 +40,7 @@ public class StudentService {
    *
    * @return　受講生詳細一覧（全件）
    */
-  public List<StudentDetail> searchStudentlList() {
+  public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
     List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
@@ -56,7 +58,7 @@ public class StudentService {
    */
   public StudentDetail searchStudent(String id) {
     Student student = repository.searchStudent(id)
-        .orElseThrow(() -> new RuntimeException("Student not found" + id));
+        .orElseThrow(() -> new ResourceNotFoundException("Student not found" + id));
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
     return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
@@ -72,6 +74,10 @@ public class StudentService {
    */
   @Transactional
   public StudentDetail registerStudent(StudentDetail studentDetail) {
+    if (studentDetail == null || studentDetail.getStudent() == null) {
+      throw new IllegalArgumentException("invalid student detail");
+    }
+
     Student student = studentDetail.getStudent();
 
     repository.registerStudent(student);
@@ -96,7 +102,7 @@ public class StudentService {
   @Transactional
   public StudentDetail addCourseDetail(String id, CourseDetail courseDetail) {
     Student student = repository.searchStudent(id)
-        .orElseThrow(() -> new RuntimeException("Student not found" + id));
+        .orElseThrow(() -> new ResourceNotFoundException("Student not found" + id));
 
     initStudentCourse(courseDetail,id);
     repository.registerStudentCourse(courseDetail.getStudentCourse());
@@ -145,6 +151,9 @@ public class StudentService {
    */
   @Transactional
   public void updateStudent(Student student) {
+    repository.searchStudent(student.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Student not found" + student.getId()));
+
     repository.updateStudent(student);
   }
 
@@ -159,17 +168,17 @@ public class StudentService {
     Optional<StudentCourse> studentCourse = repository.searchStudentCourseByCourseId(
         courseId);
     if (studentCourse.isEmpty()) {
-      throw new RuntimeException("Student not found" + courseId);
+      throw new ResourceNotFoundException("Course not found" + courseId);
     }
 
     CourseApplication courseApplication = repository.searchCourseApplicationByCourseId(courseId)
-        .orElseThrow(() -> new RuntimeException("Student not found" + courseId));
+        .orElseThrow(() -> new ResourceNotFoundException("Application not found" + courseId));
 
     ApplicationStatus currentStatus = courseApplication.getStatus();
     ApplicationStatus nextStatus = courseDetail.getCourseApplication().getStatus();
 
     if (!currentStatus.canTransitionTo(nextStatus)) {
-      throw new IllegalStateException("不正なステータス遷移");
+      throw new InvalidStatusTransitionException("Invalid status transition");
     }
 
     repository.updateStudentCourse(courseDetail.getStudentCourse());

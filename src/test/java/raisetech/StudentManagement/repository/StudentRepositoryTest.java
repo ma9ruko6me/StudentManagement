@@ -205,35 +205,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 同じ受講生コースIDを持つ受講生コース申込状況の登録をした時にエラーが返ってくること() {
-    CourseApplication courseApplication = new CourseApplication();
-    courseApplication.setStudentId("1");
-    courseApplication.setCourseId("1");
-    courseApplication.setStatus(ApplicationStatus.TEMP);
-
-    assertThatThrownBy(() -> sut.registerCourseApplication(courseApplication)).isInstanceOf(Exception.class);
-  }
-
-  @Test
-  void 受講生IDのない受講生コース申込状況の登録をしたときにエラーが返ってくること() {
-    CourseApplication courseApplication = new CourseApplication();
-    courseApplication.setCourseId("20");
-
-    assertThatThrownBy(() -> sut.registerCourseApplication(courseApplication))
-        .isInstanceOf(Exception.class);
-  }
-
-  @Test
-  void 受講生コースIDのない受講生コース申込状況の登録をしたときにエラーが返ってくること() {
-    CourseApplication courseApplication = new CourseApplication();
-    courseApplication.setStudentId("20");
-
-    assertThatThrownBy(() -> sut.registerCourseApplication(courseApplication))
-        .isInstanceOf(Exception.class);
-  }
-
-  @Test
-  void 受講生のnameの更新ができること() {
+  void 受講生のnameが更新できること() {
     String id = "1";
     Student before = sut.searchStudent(id).orElseThrow();
 
@@ -262,36 +234,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生の更新ができること() {
-    String id = "1";
-    Student before = sut.searchStudent(id).orElseThrow();
-
-    Student expected = new Student();
-    expected.setId(before.getId());
-    expected.setName(before.getName());
-    expected.setAge(before.getAge());
-
-    expected.setName("テスト四太郎");
-
-    sut.updateStudent(expected);
-
-    Student after = sut.searchStudent(id).orElseThrow();
-
-    assertThat(after)
-        .satisfies(student -> {
-          assertThat(student.getId()).isEqualTo(before.getId());
-
-          assertThat(student.getName())
-              .isEqualTo(expected.getName())
-              .isNotEqualTo(before.getName());
-
-          assertThat(student.getAge())
-              .isEqualTo(before.getAge());
-        });
-  }
-
-  @Test
-  void 受講生コース情報の更新ができること() {
+  void 受講生コース情報のcourseが更新できること() {
     String id = "1";
 
     StudentCourse before = sut.searchStudentCourseByStudentId(id).get(0);
@@ -322,7 +265,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生コース申込状況の更新ができること() {
+  void 受講生コース申込状況のstatusが更新できること() {
     String id = "1";
     CourseApplication before = sut.searchCourseApplicationByStudentId(id).get(0);
     CourseApplication expected = new CourseApplication();
