@@ -151,37 +151,37 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の登録が行えること () {
-    Student student1 = new Student();
-    student1.setName("テスト四太郎");
-    student1.setHurigana("てすとしたろう");
-    student1.setNickname("テスト大好きくん");
-    student1.setEmail("test@example.com");
-    student1.setArea("テスト県");
-    student1.setAge(18);
-    student1.setGender("男性");
-    student1.setRemark("");
-    student1.setDeleted(false);
-    Student student = student1;
+    Student student = new Student();
+    student.setName("テスト四太郎");
+    student.setHurigana("てすとしたろう");
+    student.setNickname("テスト大好きくん");
+    student.setEmail("test@example.com");
+    student.setArea("テスト県");
+    student.setAge(18);
+    student.setGender("男性");
+    student.setRemark("");
+    student.setDeleted(false);
 
     sut.registerStudent(student);
 
     List<Student> actual =sut.search();
     assertThat(actual.size()).isEqualTo(6);
+    assertThat(student.getId()).isNotNull();
   }
 
   @Test
   void 受講生コース情報の登録ができること() {
-    StudentCourse studentCourse1 = new StudentCourse();
-    studentCourse1.setStudentId("1");
-    studentCourse1.setCourse("テストコース");
-    studentCourse1.setStartDate(LocalDate.parse("2026-02-16"));
-    studentCourse1.setEndDate(LocalDate.parse("2027-02-16"));
-    StudentCourse studentCourse = studentCourse1;
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setStudentId("1");
+    studentCourse.setCourse("テストコース");
+    studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
+    studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
 
     sut.registerStudentCourse(studentCourse);
 
     List<StudentCourse> actual =sut.searchStudentCourseList();
     assertThat(actual.size()).isEqualTo(10);
+    assertThat(studentCourse.getId()).isNotNull();
   }
 
   @Test
@@ -202,6 +202,7 @@ class StudentRepositoryTest {
             CourseApplication::getStatus
         )
         .contains(tuple("10","10",ApplicationStatus.TEMP));
+    assertThat(courseApplication.getId()).isNotNull();
   }
 
   @Test
