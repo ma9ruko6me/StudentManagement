@@ -13,6 +13,36 @@
     SELECT * FROM students WHERE id = #{id}
   </select>
 
+  <select id="searchStudentByCondition" resultType="raisetech.StudentManagement.data.Student">
+    SELECT * FROM students
+    <where>
+
+      <if test="studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
+        <trim prefix="AND (" suffix=")" prefixOverrides="OR">
+          OR name LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+          OR furigana LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+        </trim>
+      </if>
+
+      <if test="studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
+        AND age >= #{studentSearchCondition.ageFrom}
+      </if>
+
+      <if test="studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
+        AND age &lt;= #{studentSearchCondition.ageTo}
+      </if>
+
+      <if test="studentSearchCondition.area != null and studentSearchCondition.area !=''">
+        AND area = #{studentSearchCondition.area}
+      </if>
+
+      <if test="studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
+        AND gender = #{studentSearchCondition.gender}
+      </if>
+
+    </where>
+  </select>
+
   <!-- 受講生コース情報の全件検索 -->
   <select id="searchStudentCourseList" resultType="raisetech.StudentManagement.data.StudentCourse">
     SELECT * FROM students_courses

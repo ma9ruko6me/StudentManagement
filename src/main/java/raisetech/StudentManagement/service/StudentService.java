@@ -1,6 +1,5 @@
 package raisetech.StudentManagement.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +13,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
@@ -63,6 +63,20 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
     return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+  }
+
+  public List<StudentDetail> searchStudentListByCondition(SearchCondition condition) {
+    if (condition == null || !condition.hasAnyCondition()) {
+      throw new IllegalArgumentException("Condition is null");
+    }
+
+    List<Student> studentList = repository.searchStudentByCondition(condition);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
+    List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
+
+    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetails(studentCourseList, courseApplicationList);
+
+    return studentConverter.convertStudentDetails(studentList, courseDetailList);
   }
 
   /**

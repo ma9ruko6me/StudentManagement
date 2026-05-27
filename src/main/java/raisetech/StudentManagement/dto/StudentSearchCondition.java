@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class StudentSearchCondition {
 
-  private String name;
+  private String keyword;
 
   @Min(0)
   private Integer ageFrom;
@@ -19,4 +19,10 @@ public class StudentSearchCondition {
   private Integer ageTo;
 
   private  String area;
+
+  private String gender;
+
+  public boolean isEmpty() {
+    return keyword == null && ageFrom == null && ageTo == null && area == null  && gender == null;
+  }
 }

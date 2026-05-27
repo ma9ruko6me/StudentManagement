@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -52,6 +53,11 @@ public class StudentController {
   @GetMapping("/student/{id}")
   public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
     return ResponseEntity.ok(service.searchStudent(id));
+  }
+
+  @PostMapping("/studentListByCondition")
+  public ResponseEntity<List<StudentDetail>> getStudentListByCondition(@RequestBody @Valid SearchCondition searchCondition) {
+    return ResponseEntity.ok(service.searchStudentListByCondition(searchCondition));
   }
 
   /**

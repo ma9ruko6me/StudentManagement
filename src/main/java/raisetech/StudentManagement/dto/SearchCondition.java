@@ -22,4 +22,10 @@ public class SearchCondition {
 
   @Valid
   private ApplicationSearchCondition applicationSearchCondition;
+
+  public boolean hasAnyCondition() {
+    return (studentSearchCondition != null && !studentSearchCondition.isEmpty())
+        ||(courseSearchCondition != null && !courseSearchCondition.isEmpty())
+        ||(applicationSearchCondition != null && !applicationSearchCondition.isEmpty());
+  }
 }

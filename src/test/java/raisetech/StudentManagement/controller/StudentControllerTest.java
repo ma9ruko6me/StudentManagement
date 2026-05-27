@@ -2,6 +2,7 @@ package raisetech.StudentManagement.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -92,6 +93,28 @@ class StudentControllerTest {
 
     mockMvc.perform(get("/student/{id}", id))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void 条件検索() throws Exception {
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                  {"studentSearchCondition":{"keyword":"テスト"}}
+                """))
+        .andExpect(status().isOk());
+
+    verify(service,times(1)).searchStudentListByCondition(argThat(searchCondition ->
+        searchCondition.getStudentSearchCondition() != null &&
+            "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+        ));
+  }
+
+  @Test
+  void 条件検索_例外が返ってくる() throws Exception {
+    doThrow(new IllegalArgumentException()).when(service).searchStudentListByCondition(any());
+
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON).content(""))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

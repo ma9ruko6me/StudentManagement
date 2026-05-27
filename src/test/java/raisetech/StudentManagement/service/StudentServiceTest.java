@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.annotation.Nonnull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,8 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.SearchCondition;
+import raisetech.StudentManagement.dto.StudentSearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
@@ -179,6 +180,66 @@ class StudentServiceTest {
     assertThat(actual).isNotNull();
     assertThat(actual.getStudent()).isNotNull();
     assertThat(actual.getCourseDetailList()).isEmpty();
+  }
+
+  @Test
+  void 条件検索 () {
+    Student student = createStudent();
+    StudentCourse studentCourse = createStudentCourse(student.getId());
+    CourseApplication courseApplication = createCourseApplication(student.getId(), studentCourse.getId());
+
+    List<Student> studentList = List.of(student);
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
+    List<CourseApplication> courseApplicationList = List.of(courseApplication);
+
+    CourseDetail courseDetail = new CourseDetail();
+    courseDetail.setStudentCourse(studentCourse);
+    courseDetail.setCourseApplication(courseApplication);
+
+    List<CourseDetail> courseDetailList = List.of(courseDetail);
+
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(student);
+    studentDetail.setCourseDetailList(courseDetailList);
+
+    List<StudentDetail> expected = List.of(studentDetail);
+
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword(student.getName());
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+
+    when(repository.searchStudentByCondition(searchCondition)).thenReturn(studentList);
+    when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
+    when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
+
+    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
+
+    List<StudentDetail> actual = sut.searchStudentListByCondition(searchCondition);
+
+    verify(repository, times(1)).searchStudentByCondition(searchCondition);
+    verify(repository, times(1)).searchStudentCourseList();
+    verify(repository, times(1)).searchCourseApplicationList();
+
+    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
+
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  void 条件検索_検索条件が全て空(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    assertThatThrownBy(()->sut.searchStudentListByCondition(searchCondition))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 条件検索_検索条件がnull(){
+    assertThatThrownBy(()->sut.searchStudentListByCondition(null))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

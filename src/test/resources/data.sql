@@ -4,7 +4,8 @@ VALUES
     ('森保一', 'もりやすはじめ', 'ポイチ', 56, 'hajime.moriyasu@example.com', '長崎県', '男性'),
     ('遠藤航', 'えんどうわたる', 'ワタ', 32, 'wata@example.com', '神奈川県', '男性'),
     ('長谷川唯', 'はせがわゆい', 'ハッセー', 29, 'yui.hase@example.com', '埼玉県', '女性'),
-    ('澤穂希', 'さわほまれ', 'ホマ', 47, 'homare.sawa@example.com', '東京都', '女性');
+    ('澤穂希', 'さわほまれ', 'ホマ', 47, 'homare.sawa@example.com', '東京都', '女性'),
+    ('森保ゆい', 'もりやすゆい', 'モリ', 24, 'yui.moriyasu.404@noema.jp', '石川県', 'その他');
 
 INSERT INTO students_courses (student_id, course_name, course_start_at, course_end_at)
 VALUES
@@ -16,7 +17,8 @@ VALUES
     (3, 'デザインコース', '2025-10-07 00:00:00', '2026-06-23 00:00:00'),
     (4, 'AWSコース', '2026-02-14 00:00:00', '2027-02-14 00:00:00'),
     (4, '英会話コース', '2026-02-15 00:00:00', '2027-02-15 00:00:00'),
-    (5, 'WPコース', '2026-02-16 00:00:00', '2027-02-16 00:00:00');
+    (5, 'WPコース', '2026-02-16 00:00:00', '2027-02-16 00:00:00'),
+    (6, 'Javaコース', '2026-02-16 00:00:00', '2027-02-16 00:00:00');
 
 INSERT INTO course_applications (student_id,course_id,application_status)
 VALUES
@@ -28,4 +30,5 @@ VALUES
     (3,6,'FORMAL'),
     (4,7,'COMPLETED'),
     (4,8,'FORMAL'),
-    (5,9,'TEMP');
+    (5,9,'TEMP'),
+    (6,10,'CANCEL');

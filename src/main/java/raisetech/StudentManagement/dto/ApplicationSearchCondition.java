@@ -9,5 +9,9 @@ import lombok.Setter;
 @Setter
 public class ApplicationSearchCondition {
 
-  private String status;
+  private String applicationStatus;
+
+  public boolean isEmpty() {
+    return applicationStatus == null;
+  }
 }

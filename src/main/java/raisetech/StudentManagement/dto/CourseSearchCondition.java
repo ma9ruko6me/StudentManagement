@@ -9,5 +9,9 @@ import lombok.Setter;
 @Setter
 public class CourseSearchCondition {
 
-  private String course;
+  private String courseName;
+
+  public boolean isEmpty() {
+    return courseName == null;
+  }
 }

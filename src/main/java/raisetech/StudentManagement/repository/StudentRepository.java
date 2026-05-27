@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.dto.SearchCondition;
 
 /**
  * 受講生テーブル、受講生コース情報テーブル、受講生コース申込状況テーブルと紐づくRepositoryです。
@@ -27,6 +28,8 @@ public interface StudentRepository {
    * @return　受講生
    */
   Optional<Student> searchStudent(String id);
+
+  List<Student> searchStudentByCondition(SearchCondition condition);
 
   /**
    * 受講生のコース情報の全件検索を行います。
