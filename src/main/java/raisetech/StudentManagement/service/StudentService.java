@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,11 +124,11 @@ public class StudentService {
    */
   private void initStudentCourse(CourseDetail courseDetail,String studentId) {
     StudentCourse studentCourse = courseDetail.getStudentCourse();
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
 
     studentCourse.setStudentId(studentId);
-    studentCourse.setStartDate(now);
-    studentCourse.setEndDate(now.plusYears(1));
+    studentCourse.setCourseStartAt(now);
+    studentCourse.setCourseEndAt(now.plusYears(1));
   }
 
   /**
@@ -141,7 +142,7 @@ public class StudentService {
 
     courseApplication.setStudentId(studentId);
     courseApplication.setCourseId(courseDetail.getStudentCourse().getId());
-    courseApplication.setStatus(ApplicationStatus.TEMP);
+    courseApplication.setApplicationStatus(ApplicationStatus.TEMP);
   }
 
   /**
@@ -174,8 +175,8 @@ public class StudentService {
     CourseApplication courseApplication = repository.searchCourseApplicationByCourseId(courseId)
         .orElseThrow(() -> new ResourceNotFoundException("Application not found" + courseId));
 
-    ApplicationStatus currentStatus = courseApplication.getStatus();
-    ApplicationStatus nextStatus = courseDetail.getCourseApplication().getStatus();
+    ApplicationStatus currentStatus = courseApplication.getApplicationStatus();
+    ApplicationStatus nextStatus = courseDetail.getCourseApplication().getApplicationStatus();
 
     if (!currentStatus.canTransitionTo(nextStatus)) {
       throw new InvalidStatusTransitionException("Invalid status transition");

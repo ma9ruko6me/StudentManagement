@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -78,7 +79,7 @@ class StudentRepositoryTest {
         .satisfies(studentCourse -> {
           assertThat(studentCourse.getId()).isEqualTo(id);
           assertThat(studentCourse.getStudentId()).isEqualTo("1");
-          assertThat(studentCourse.getCourse()).isEqualTo("Javaコース");
+          assertThat(studentCourse.getCourseName()).isEqualTo("Javaコース");
         });
   }
 
@@ -104,7 +105,7 @@ class StudentRepositoryTest {
             CourseApplication::getId,
             CourseApplication::getStudentId,
             CourseApplication::getCourseId,
-            CourseApplication::getStatus
+            CourseApplication::getApplicationStatus
         )
         .contains(
             tuple("1","1","1",ApplicationStatus.IN_PROGRESS)
@@ -138,7 +139,7 @@ class StudentRepositoryTest {
           assertThat(courseApplication.getId()).isEqualTo(id);
           assertThat(courseApplication.getStudentId()).isEqualTo("1");
           assertThat(courseApplication.getCourseId()).isEqualTo("1");
-          assertThat(courseApplication.getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
+          assertThat(courseApplication.getApplicationStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
         });
   }
 
@@ -153,7 +154,7 @@ class StudentRepositoryTest {
   void 受講生の登録が行えること () {
     Student student = new Student();
     student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
+    student.setFurigana("てすとしたろう");
     student.setNickname("テスト大好きくん");
     student.setEmail("test@example.com");
     student.setArea("テスト県");
@@ -173,9 +174,9 @@ class StudentRepositoryTest {
   void 受講生コース情報の登録ができること() {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
-    studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
-    studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
+    studentCourse.setCourseName("テストコース");
+    studentCourse.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
+    studentCourse.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
 
     sut.registerStudentCourse(studentCourse);
 
@@ -189,7 +190,7 @@ class StudentRepositoryTest {
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setStudentId("10");
     courseApplication.setCourseId("10");
-    courseApplication.setStatus(ApplicationStatus.TEMP);
+    courseApplication.setApplicationStatus(ApplicationStatus.TEMP);
 
     sut.registerCourseApplication(courseApplication);
 
@@ -199,7 +200,7 @@ class StudentRepositoryTest {
         .extracting(
             CourseApplication::getStudentId,
             CourseApplication::getCourseId,
-            CourseApplication::getStatus
+            CourseApplication::getApplicationStatus
         )
         .contains(tuple("10","10",ApplicationStatus.TEMP));
     assertThat(courseApplication.getId()).isNotNull();
@@ -243,9 +244,9 @@ class StudentRepositoryTest {
     StudentCourse expected = new StudentCourse();
     expected.setId(before.getId());
     expected.setStudentId(before.getStudentId());
-    expected.setCourse("テストコース");
-    expected.setStartDate(before.getStartDate());
-    expected.setEndDate(before.getEndDate());
+    expected.setCourseName("テストコース");
+    expected.setCourseStartAt(before.getCourseStartAt());
+    expected.setCourseEndAt(before.getCourseEndAt());
 
     sut.updateStudentCourse(expected);
 
@@ -259,9 +260,9 @@ class StudentRepositoryTest {
           assertThat(studentCourse.getStudentId())
               .isEqualTo(before.getStudentId());
 
-          assertThat(studentCourse.getCourse())
-              .isEqualTo(expected.getCourse())
-              .isNotEqualTo(before.getCourse());
+          assertThat(studentCourse.getCourseName())
+              .isEqualTo(expected.getCourseName())
+              .isNotEqualTo(before.getCourseName());
         });
   }
 
@@ -273,7 +274,7 @@ class StudentRepositoryTest {
     expected.setId(before.getId());
     expected.setStudentId(before.getStudentId());
     expected.setCourseId(before.getCourseId());
-    expected.setStatus(ApplicationStatus.FORMAL);
+    expected.setApplicationStatus(ApplicationStatus.FORMAL);
 
     sut.updateCourseApplication(expected);
 
@@ -284,9 +285,9 @@ class StudentRepositoryTest {
       assertThat(courseApplication.getStudentId()).isEqualTo(before.getStudentId());
       assertThat(courseApplication.getCourseId()).isEqualTo(before.getCourseId());
 
-      assertThat(courseApplication.getStatus())
-          .isEqualTo(expected.getStatus())
-          .isNotEqualTo(before.getStatus());
+      assertThat(courseApplication.getApplicationStatus())
+          .isEqualTo(expected.getApplicationStatus())
+          .isNotEqualTo(before.getApplicationStatus());
     });
   }
 }

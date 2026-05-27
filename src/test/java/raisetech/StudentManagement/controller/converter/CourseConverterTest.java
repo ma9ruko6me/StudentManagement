@@ -1,9 +1,7 @@
 package raisetech.StudentManagement.controller.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,22 +24,22 @@ class CourseConverterTest {
     StudentCourse studentCourse1 = new StudentCourse();
     studentCourse1.setId("1");
     studentCourse1.setStudentId("1");
-    studentCourse1.setCourse("テストコース");
+    studentCourse1.setCourseName("テストコース");
     CourseApplication courseApplication1 = new CourseApplication();
     courseApplication1.setId("1");
     courseApplication1.setCourseId("1");
     courseApplication1.setStudentId("1");
-    courseApplication1.setStatus(ApplicationStatus.FORMAL);
+    courseApplication1.setApplicationStatus(ApplicationStatus.FORMAL);
 
     StudentCourse studentCourse2 = new StudentCourse();
     studentCourse2.setId("2");
     studentCourse2.setStudentId("2");
-    studentCourse2.setCourse("test");
+    studentCourse2.setCourseName("test");
     CourseApplication courseApplication2 = new CourseApplication();
     courseApplication2.setId("2");
     courseApplication2.setCourseId("2");
     courseApplication2.setStudentId("2");
-    courseApplication2.setStatus(ApplicationStatus.IN_PROGRESS);
+    courseApplication2.setApplicationStatus(ApplicationStatus.IN_PROGRESS);
 
     List<StudentCourse> studentCourseList = List.of(studentCourse1, studentCourse2);
     List<CourseApplication> courseApplicationList = List.of(courseApplication1, courseApplication2);
@@ -59,12 +57,12 @@ class CourseConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
+    studentCourse.setCourseName("テストコース");
     CourseApplication courseApplication = new CourseApplication();
     courseApplication.setId("1");
     courseApplication.setCourseId("2");
     courseApplication.setStudentId("2");
-    courseApplication.setStatus(ApplicationStatus.FORMAL);
+    courseApplication.setApplicationStatus(ApplicationStatus.FORMAL);
 
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     List<CourseApplication> courseApplicationList = List.of(courseApplication);

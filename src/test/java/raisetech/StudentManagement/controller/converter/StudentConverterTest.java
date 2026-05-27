@@ -28,7 +28,7 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
+    studentCourse.setCourseName("テストコース");
 
     CourseDetail courseDetail = new CourseDetail();
     courseDetail.setStudentCourse(studentCourse);
@@ -51,7 +51,7 @@ class StudentConverterTest {
     StudentCourse studentCourse1 = new StudentCourse();
     studentCourse1.setId("1");
     studentCourse1.setStudentId("2");
-    studentCourse1.setCourse("テストコース");
+    studentCourse1.setCourseName("テストコース");
 
     CourseDetail courseDetail = new CourseDetail();
     courseDetail.setStudentCourse(studentCourse1);

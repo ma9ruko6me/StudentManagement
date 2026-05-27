@@ -103,7 +103,7 @@ class StudentControllerTest {
                     {
                         "student": {
                             "name": "久保建英",
-                            "hurigana": "くぼたけふさ",
+                            "furigana": "くぼたけふさ",
                             "nickname": "タケ",
                             "email": "take.kubo@example.com",
                             "area": "神奈川県",
@@ -114,7 +114,7 @@ class StudentControllerTest {
                         "courseDetailList": [
                              {
                                "studentCourse": {
-                                 "course": "デザインコース"
+                                 "courseName": "デザインコース"
                                }
                              }
                         ]
@@ -138,7 +138,7 @@ class StudentControllerTest {
         .hasSize(1)
         .first()
         .satisfies(courseDetail -> {
-          assertThat(courseDetail.getStudentCourse().getCourse()).isEqualTo("デザインコース");
+          assertThat(courseDetail.getStudentCourse().getCourseName()).isEqualTo("デザインコース");
         });
   }
 
@@ -149,7 +149,7 @@ class StudentControllerTest {
     mockMvc.perform(post("/addCourse/999")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
-                {"studentCourse": {"course": "デザインコース"}}
+                {"studentCourse": {"courseName": "デザインコース"}}
                 """))
         .andExpect(status().isOk());
 
@@ -159,7 +159,7 @@ class StudentControllerTest {
     verify(service, times(1)).addCourseDetail(idCaptor.capture(),courseDetailCaptor.capture());
 
     assertThat(idCaptor.getValue()).isEqualTo("999");
-    assertThat(courseDetailCaptor.getValue().getStudentCourse().getCourse()).isEqualTo("デザインコース");
+    assertThat(courseDetailCaptor.getValue().getStudentCourse().getCourseName()).isEqualTo("デザインコース");
   }
 
   @Test
@@ -169,7 +169,7 @@ class StudentControllerTest {
 
     mockMvc.perform(post("/addCourse/999").contentType(MediaType.APPLICATION_JSON)
             .content("""
-                {"studentCourse": {"course": "デザインコース"}}
+                {"studentCourse": {"courseName": "デザインコース"}}
                 """))
         .andExpect(status().isNotFound());
   }
@@ -181,7 +181,7 @@ class StudentControllerTest {
                     {
                          "id": "2",
                          "name": "久保建英",
-                         "hurigana": "くぼたけふさ",
+                         "furigana": "くぼたけふさ",
                          "nickname": "タケ",
                          "email": "take.kubo@example.com",
                          "area": "神奈川県",
@@ -205,7 +205,7 @@ class StudentControllerTest {
               {
                 "id": "2",
                 "name": "久保建英",
-                "hurigana": "くぼたけふさ",
+                "furigana": "くぼたけふさ",
                 "nickname": "タケ",
                 "email": "take.kubo@example.com",
                 "area": "神奈川県",
@@ -224,15 +224,13 @@ class StudentControllerTest {
                   {"studentCourse": {
                   "id": "6",
                   "studentId": "2",
-                  "course": "デザインコース",
-                  "startDate": "2025-10-07",
-                  "endDate": "2026-06-23"
+                  "courseName": "デザインコース"
                 },
                 "courseApplication": {
                   "id": "6",
                   "studentId": "2",
                   "courseId": "6",
-                  "status": "FORMAL"
+                  "applicationStatus": "FORMAL"
                 }}
                 """))
         .andExpect(status().isOk())
@@ -250,11 +248,11 @@ class StudentControllerTest {
               {
                  "studentCourse": {
                     "id": "6",
-                    "course": "デザインコース"
+                    "courseName": "デザインコース"
                  },
                  "courseApplication": {
                     "id": "6",
-                    "status": "FORMAL"
+                    "applicationStatus": "FORMAL"
                  }
               }
             """))
@@ -269,11 +267,11 @@ class StudentControllerTest {
               {
                  "studentCourse": {
                     "id": "6",
-                    "course": "デザインコース"
+                    "courseName": "デザインコース"
                  },
                  "courseApplication": {
                     "id": "6",
-                    "status": "FORMAL"
+                    "applicationStatus": "FORMAL"
                  }
               }
             """))
@@ -355,7 +353,7 @@ class StudentControllerTest {
     Student student = new Student();
     student.setId("1");
     student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
+    student.setFurigana("てすとしたろう");
     student.setNickname("テスト大好きくん");
     student.setEmail("test@example.com");
     student.setArea("テスト県");

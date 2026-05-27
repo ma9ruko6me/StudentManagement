@@ -19,7 +19,7 @@ public class Student {
   private String name;
 
   @NotBlank
-  private String hurigana;
+  private String furigana;
 
   @NotBlank
   private String nickname;

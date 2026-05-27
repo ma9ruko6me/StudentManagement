@@ -45,32 +45,32 @@
 
   <!-- 受講生の登録 -->
   <insert id="registerStudent" useGeneratedKeys = "true" keyProperty = "id">
-    INSERT INTO students (name,hurigana,nickname,age,email,area,gender,remark,is_deleted) VALUES (#{name},#{hurigana},#{nickname},#{age},#{email},#{area},#{gender},#{remark},0)
+    INSERT INTO students (name,furigana,nickname,age,email,area,gender,remark,is_deleted) VALUES (#{name},#{furigana},#{nickname},#{age},#{email},#{area},#{gender},#{remark},0)
   </insert>
 
   <!-- 受講生コース情報の登録 -->
   <insert id="registerStudentCourse" useGeneratedKeys = "true" keyProperty = "id">
-    INSERT INTO students_courses (student_id,course,start_date,end_date) VALUES (#{studentId},#{course},#{startDate},#{endDate})
+    INSERT INTO students_courses (student_id,course_name,course_start_at,course_end_at) VALUES (#{studentId},#{courseName},#{courseStartAt},#{courseEndAt})
   </insert>
 
   <!--受講生コースの申込状況の登録-->
   <insert id="registerCourseApplication" useGeneratedKeys="true" keyProperty="id">
-    INSERT INTO course_applications (student_id,course_id,status) VALUES(#{studentId},#{courseId},#{status})
+    INSERT INTO course_applications (student_id,course_id,application_status) VALUES(#{studentId},#{courseId},#{applicationStatus})
   </insert>
 
   <!-- 受講生の更新 -->
   <update id="updateStudent">
-    UPDATE students SET  name = #{name},hurigana = #{hurigana},nickname = #{nickname},age = #{age},email = #{email},area = #{area},gender = #{gender},remark = #{remark},is_deleted = #{isDeleted} WHERE id = #{id}
+    UPDATE students SET  name = #{name},furigana = #{furigana},nickname = #{nickname},age = #{age},email = #{email},area = #{area},gender = #{gender},remark = #{remark},is_deleted = #{isDeleted} WHERE id = #{id}
   </update>
 
   <!-- 受講生コース情報の更新 -->
   <update id="updateStudentCourse">
-    UPDATE students_courses SET course = #{course} WHERE id = #{id}
+    UPDATE students_courses SET course_name = #{courseName} WHERE id = #{id}
   </update>
 
   <!--受講生コースの申込状況の更新-->
   <update id="updateCourseApplication">
-    UPDATE course_applications SET status = #{status} WHERE id = #{id}
+    UPDATE course_applications SET application_status = #{applicationStatus} WHERE id = #{id}
   </update>
 
 </mapper>
