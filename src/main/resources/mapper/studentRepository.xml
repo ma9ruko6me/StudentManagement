@@ -13,33 +13,67 @@
     SELECT * FROM students WHERE id = #{id}
   </select>
 
+  <!--受講生の条件検索-->
   <select id="searchStudentByCondition" resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students
 
     <where>
+      <choose>
 
-      <if test="studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
-        <trim prefix="AND (" suffix=")" prefixOverrides="OR">
-          OR name LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
-          OR furigana LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
-        </trim>
-      </if>
+        <!--AND検索-->
+        <when test="searchType == @raisetech.StudentManagement.enums.SearchType@AND">
 
-      <if test="studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
-        AND age >= #{studentSearchCondition.ageFrom}
-      </if>
+          <if test="studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
+            <trim prefix="AND (" suffix=")" prefixOverrides="OR">
+              OR name LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+              OR furigana LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+            </trim>
+          </if>
 
-      <if test="studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
-        AND age &lt;= #{studentSearchCondition.ageTo}
-      </if>
+          <if test="studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
+            AND age >= #{studentSearchCondition.ageFrom}
+          </if>
 
-      <if test="studentSearchCondition.area != null and studentSearchCondition.area !=''">
-        AND area = #{studentSearchCondition.area}
-      </if>
+          <if test="studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
+            AND age &lt;= #{studentSearchCondition.ageTo}
+          </if>
 
-      <if test="studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
-        AND gender = #{studentSearchCondition.gender}
-      </if>
+          <if test="studentSearchCondition.area != null and studentSearchCondition.area !=''">
+            AND area = #{studentSearchCondition.area}
+          </if>
+
+          <if test="studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
+            AND gender = #{studentSearchCondition.gender}
+          </if>
+
+        </when>
+
+        <when test="searchType == @raisetech.StudentManagement.enums.SearchType@OR">
+          <if test="studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
+            <trim prefix="OR (" suffix=")" prefixOverrides="OR">
+              OR name LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+              OR furigana LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
+            </trim>
+          </if>
+
+          <if test="studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
+            OR age >= #{studentSearchCondition.ageFrom}
+          </if>
+
+          <if test="studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
+            OR age &lt;= #{studentSearchCondition.ageTo}
+          </if>
+
+          <if test="studentSearchCondition.area != null and studentSearchCondition.area !=''">
+            OR area = #{studentSearchCondition.area}
+          </if>
+
+          <if test="studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
+            OR gender = #{studentSearchCondition.gender}
+          </if>
+        </when>
+
+      </choose>
 
     </where>
 

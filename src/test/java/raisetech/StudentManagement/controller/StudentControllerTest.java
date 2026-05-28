@@ -32,6 +32,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.enums.SearchType;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
@@ -99,14 +102,46 @@ class StudentControllerTest {
   void 条件検索() throws Exception {
     mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
             .content("""
-                  {"studentSearchCondition":{"keyword":"テスト"}}
+                  {
+                    "studentSearchCondition":{"keyword":"テスト"},
+                    "sortKey":"AGE",
+                    "sortOrder":"DESC",
+                    "searchType":"AND"
+                  }
                 """))
         .andExpect(status().isOk());
 
     verify(service,times(1)).searchStudentListByCondition(argThat(searchCondition ->
-        searchCondition.getStudentSearchCondition() != null &&
-            "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+            searchCondition.getStudentSearchCondition() != null
+            && "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+
+            && searchCondition.getSortKey() == SortKey.AGE
+            && searchCondition.getSortOrder() == SortOrder.DESC
+            && searchCondition.getSearchType() == SearchType.AND
+
         ));
+  }
+
+  @Test
+  void 条件検索_一部未指定() throws Exception {
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                  {
+                    "studentSearchCondition":{"keyword":"テスト"},
+                    "searchType":"OR"
+                  }
+                """))
+        .andExpect(status().isOk());
+
+    verify(service,times(1)).searchStudentListByCondition(argThat(searchCondition ->
+        searchCondition.getStudentSearchCondition() != null
+            && "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+
+            && searchCondition.getSortKey() == null
+            && searchCondition.getSortOrder() == null
+            && searchCondition.getSearchType() == SearchType.OR
+
+    ));
   }
 
   @Test

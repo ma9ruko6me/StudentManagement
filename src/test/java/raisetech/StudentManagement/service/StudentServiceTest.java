@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,9 @@ import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.dto.StudentSearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -240,6 +244,39 @@ class StudentServiceTest {
   void 条件検索_検索条件がnull(){
     assertThatThrownBy(()->sut.searchStudentListByCondition(null))
         .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 条件検索_デフォルトAND(){
+    StudentSearchCondition searchCondition = new StudentSearchCondition();
+    searchCondition.setAgeFrom(0);
+    SearchCondition condition = new SearchCondition();
+    condition.setStudentSearchCondition(searchCondition);
+
+    sut.searchStudentListByCondition(condition);
+
+    assertThat(condition.getSearchType()).isEqualTo(SearchType.AND);
+  }
+
+  @Test
+  void 条件検索_検索条件が渡ること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.DESC);
+    searchCondition.setSearchType(SearchType.OR);
+
+    sut.searchStudentListByCondition(searchCondition);
+
+    verify(repository,times(1))
+        .searchStudentByCondition(argThat(condition ->
+            condition.getStudentSearchCondition().getAgeFrom() == 0
+            && condition.getSortKey() == SortKey.NAME
+            && condition.getSortOrder() == SortOrder.DESC
+            && condition.getSearchType() == SearchType.OR
+        ));
   }
 
   @Test

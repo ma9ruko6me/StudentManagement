@@ -15,6 +15,7 @@ import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -68,6 +69,10 @@ public class StudentService {
   public List<StudentDetail> searchStudentListByCondition(SearchCondition condition) {
     if (condition == null || !condition.hasAnyCondition()) {
       throw new IllegalArgumentException("Condition is null");
+    }
+
+    if (condition.getSearchType() == null) {
+      condition.setSearchType(SearchType.AND);
     }
 
     List<Student> studentList = repository.searchStudentByCondition(condition);

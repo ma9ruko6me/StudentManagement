@@ -17,6 +17,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.dto.StudentSearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.enums.SortKey;
 import raisetech.StudentManagement.enums.SortOrder;
 
@@ -59,17 +60,7 @@ class StudentRepositoryTest {
     studentSearchCondition.setKeyword("鈴木");
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
-
-    List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual.size()).isEqualTo(1);
-  }
-
-  @Test
-  void 条件検索_キーワード_furigana(){
-    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
-    studentSearchCondition.setKeyword("さわ");
-    SearchCondition searchCondition = new SearchCondition();
-    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(1);
@@ -81,6 +72,7 @@ class StudentRepositoryTest {
     studentSearchCondition.setKeyword("ゆい");
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(2);
@@ -92,20 +84,22 @@ class StudentRepositoryTest {
     studentSearchCondition.setAgeFrom(30);
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(3);
   }
 
   @Test
-  void 条件検索_ageTo(){
+  void 条件検索_出身(){
     StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
-    studentSearchCondition.setAgeTo(30);
+    studentSearchCondition.setArea("埼玉県");
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual.size()).isEqualTo(3);
+    assertThat(actual.size()).isEqualTo(2);
   }
 
   @Test
@@ -115,55 +109,75 @@ class StudentRepositoryTest {
     studentSearchCondition.setAgeFrom(30);
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(1);
   }
 
   @Test
-  void 条件検索_出身(){
-    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
-    studentSearchCondition.setArea("埼玉県");
-    SearchCondition searchCondition = new SearchCondition();
-    searchCondition.setStudentSearchCondition(studentSearchCondition);
-
-    List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual.size()).isEqualTo(2);
-  }
-
-  @Test
-  void 条件検索_性別(){
-    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
-    studentSearchCondition.setGender("その他");
-    SearchCondition searchCondition = new SearchCondition();
-    searchCondition.setStudentSearchCondition(studentSearchCondition);
-
-    List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual.size()).isEqualTo(1);
-  }
-
-  @Test
-  void 条件検索_ageFromとageTo(){
-    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
-    studentSearchCondition.setAgeFrom(20);
-    studentSearchCondition.setAgeTo(30);
-    SearchCondition searchCondition = new SearchCondition();
-    searchCondition.setStudentSearchCondition(studentSearchCondition);
-
-    List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual.size()).isEqualTo(3);
-  }
-
-  @Test
-  void 条件検索_名前と出身(){
+  void 条件検索_AND_名前と出身の両方一致(){
     StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
     studentSearchCondition.setKeyword("鈴木");
     studentSearchCondition.setArea("埼玉県");
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @Test
+  void 条件検索_AND_名前と出身の片方一致(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+    studentSearchCondition.setArea("テスト県");
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<Student> actual = sut.searchStudentByCondition(searchCondition);
+    assertThat(actual).isEmpty();
+  }
+
+  @Test
+  void 条件検索_ANDとORの差(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+    studentSearchCondition.setArea("埼玉県");
+
+    SearchCondition andCondition = new SearchCondition();
+    andCondition.setStudentSearchCondition(studentSearchCondition);
+    andCondition.setSearchType(SearchType.AND);
+
+    SearchCondition orCondition = new SearchCondition();
+    orCondition.setStudentSearchCondition(studentSearchCondition);
+    orCondition.setSearchType(SearchType.OR);
+
+    List<Student> andResult = sut.searchStudentByCondition(andCondition);
+    List<Student> orResult = sut.searchStudentByCondition(orCondition);
+
+    assertThat(andResult.size()).isLessThan(orResult.size());
+  }
+
+  @Test
+  void 条件検索_ANDとORで同じ(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+
+    SearchCondition andCondition = new SearchCondition();
+    andCondition.setStudentSearchCondition(studentSearchCondition);
+    andCondition.setSearchType(SearchType.AND);
+
+    SearchCondition orCondition = new SearchCondition();
+    orCondition.setStudentSearchCondition(studentSearchCondition);
+    orCondition.setSearchType(SearchType.OR);
+
+    List<Student> andResult = sut.searchStudentByCondition(andCondition);
+    List<Student> orResult = sut.searchStudentByCondition(orCondition);
+
+    assertThat(andResult).isEqualTo(orResult);
   }
 
   @Test
@@ -190,15 +204,15 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 条件検索_ageで昇順(){
+  void 条件検索_nameで昇順(){
     StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
     SearchCondition searchCondition = new SearchCondition();
     searchCondition.setStudentSearchCondition(studentSearchCondition);
-    searchCondition.setSortKey(SortKey.AGE);
+    searchCondition.setSortKey(SortKey.NAME);
     searchCondition.setSortOrder(SortOrder.ASC);
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
-    assertThat(actual).extracting(Student::getAge).isSortedAccordingTo(Comparator.naturalOrder());
+    assertThat(actual).extracting(Student::getName).isSortedAccordingTo(Comparator.naturalOrder());
   }
 
   @Test

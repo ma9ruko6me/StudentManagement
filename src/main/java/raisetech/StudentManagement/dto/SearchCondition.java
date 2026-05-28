@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.enums.SortKey;
 import raisetech.StudentManagement.enums.SortOrder;
 
@@ -34,4 +35,6 @@ public class SearchCondition {
   private SortKey sortKey;
 
   private SortOrder sortOrder;
+
+  private SearchType searchType;
 }
