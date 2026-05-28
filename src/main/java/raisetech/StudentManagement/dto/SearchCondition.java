@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 
 @Schema(description = "受講生詳細検索条件")
 @Getter
@@ -28,4 +30,8 @@ public class SearchCondition {
         ||(courseSearchCondition != null && !courseSearchCondition.isEmpty())
         ||(applicationSearchCondition != null && !applicationSearchCondition.isEmpty());
   }
+
+  private SortKey sortKey;
+
+  private SortOrder sortOrder;
 }

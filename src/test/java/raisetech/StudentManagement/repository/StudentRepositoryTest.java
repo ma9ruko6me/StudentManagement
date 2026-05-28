@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.dto.SearchCondition;
 import raisetech.StudentManagement.dto.StudentSearchCondition;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -171,6 +174,31 @@ class StudentRepositoryTest {
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual.size()).isEqualTo(6);
+    assertThat(actual).extracting(Student::getId).isSortedAccordingTo(Comparator.naturalOrder());
+  }
+
+  @Test
+  void 条件検索_nameで降順(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.DESC);
+
+    List<Student> actual = sut.searchStudentByCondition(searchCondition);
+    assertThat(actual).extracting(Student::getName).isSortedAccordingTo(Comparator.reverseOrder());
+  }
+
+  @Test
+  void 条件検索_ageで昇順(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.AGE);
+    searchCondition.setSortOrder(SortOrder.ASC);
+
+    List<Student> actual = sut.searchStudentByCondition(searchCondition);
+    assertThat(actual).extracting(Student::getAge).isSortedAccordingTo(Comparator.naturalOrder());
   }
 
   @Test

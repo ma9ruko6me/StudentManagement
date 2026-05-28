@@ -15,6 +15,7 @@
 
   <select id="searchStudentByCondition" resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students
+
     <where>
 
       <if test="studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
@@ -41,6 +42,15 @@
       </if>
 
     </where>
+
+    <if test="sortKey != null and sortOrder != null">
+      ORDER BY ${sortKey.column} ${sortOrder.value}
+    </if>
+
+    <if test="sortKey == null and sortOrder == null">
+      ORDER BY id ASC
+    </if>
+
   </select>
 
   <!-- 受講生コース情報の全件検索 -->
