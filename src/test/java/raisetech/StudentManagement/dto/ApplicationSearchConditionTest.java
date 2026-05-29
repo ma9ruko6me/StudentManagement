@@ -3,6 +3,8 @@ package raisetech.StudentManagement.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import raisetech.StudentManagement.dto.request.ApplicationSearchCondition;
+import raisetech.StudentManagement.enums.ApplicationStatus;
 
 class ApplicationSearchConditionTest {
 
@@ -16,7 +18,7 @@ class ApplicationSearchConditionTest {
   @Test
   void 検索条件が1つでも入力されている場合falseを返すこと(){
     ApplicationSearchCondition condition = new ApplicationSearchCondition();
-    condition.setApplicationStatus("TEMP");
+    condition.setApplicationStatus(ApplicationStatus.FORMAL);
 
     assertThat(condition.isEmpty()).isFalse();
   }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.result.SearchResult;
 
 /**
  * 受講生詳細を受講生や受講生コース情報、もしくはその逆の変換を行うコンバーターです。
@@ -36,5 +37,20 @@ public class StudentConverter {
       studentDetails.add(studentDetail);
     });
     return studentDetails;
+  }
+
+  public Student convertStudent(SearchResult searchResult) {
+    Student student = new Student();
+    student.setId(searchResult.getStudentId());
+    student.setName(searchResult.getName());
+    student.setFurigana(searchResult.getFurigana());
+    student.setNickname(searchResult.getNickname());
+    student.setEmail(searchResult.getEmail());
+    student.setArea(searchResult.getArea());
+    student.setAge(searchResult.getAge());
+    student.setGender(searchResult.getGender());
+    student.setRemark(searchResult.getRemark());
+    student.setDeleted(searchResult.isDeleted());
+    return student;
   }
 }

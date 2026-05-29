@@ -7,7 +7,10 @@ public enum SortKey {
   NAME("name"),
   AGE("age"),
   AREA("area"),
-  GENDER("gender");
+  GENDER("gender"),
+  IS_DELETED("isDeleted"),
+  COURSE_NAME("courseName"),
+  APPLICATION_STATUS("applicationStatus");
 
   @Getter
   private final String column;

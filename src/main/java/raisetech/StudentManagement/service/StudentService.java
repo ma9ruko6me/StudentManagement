@@ -1,7 +1,10 @@
 package raisetech.StudentManagement.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,8 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.SearchCondition;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.result.SearchResult;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
@@ -47,7 +51,7 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
     List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
 
-    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetails(studentCourseList, courseApplicationList);
+    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList);
 
     return studentConverter.convertStudentDetails(studentList, courseDetailList);
   }
@@ -63,7 +67,7 @@ public class StudentService {
         .orElseThrow(() -> new ResourceNotFoundException("Student not found" + id));
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
-    return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+    return new StudentDetail(student, courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList));
   }
 
   public List<StudentDetail> searchStudentListByCondition(SearchCondition condition) {
@@ -79,9 +83,43 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
     List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
 
-    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetails(studentCourseList, courseApplicationList);
+    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList);
 
     return studentConverter.convertStudentDetails(studentList, courseDetailList);
+  }
+
+  public List<StudentDetail> searchStudentDetail(SearchCondition condition) {
+    if (condition == null || !condition.hasAnyCondition()) {
+      throw new IllegalArgumentException("Condition is null");
+    }
+
+    if (condition.getSearchType() == null) {
+      condition.setSearchType(SearchType.AND);
+    }
+
+    List<SearchResult> searchResultList = repository.searchStudentDetail(condition);
+
+    Map<String,StudentDetail> studentDetailMap = new LinkedHashMap<>();
+
+    for (SearchResult result : searchResultList) {
+
+      StudentDetail studentDetail = studentDetailMap.computeIfAbsent(
+          result.getStudentId(),
+          id -> {
+            StudentDetail detail = new StudentDetail();
+            detail.setStudent(studentConverter.convertStudent(result));
+            detail.setCourseDetailList(new ArrayList<>());
+            return detail;
+          }
+      );
+
+      CourseDetail courseDetail = courseConverter.convertCourseDetail(result);
+
+      studentDetail.getCourseDetailList().add(courseDetail);
+
+    }
+
+    return new ArrayList<>(studentDetailMap.values());
   }
 
   /**
@@ -132,7 +170,7 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
 
-    return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+    return new StudentDetail(student, courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList));
   }
 
   /**

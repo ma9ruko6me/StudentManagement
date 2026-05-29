@@ -2,6 +2,7 @@ package raisetech.StudentManagement.controller.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
+import raisetech.StudentManagement.dto.result.SearchResult;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 
 class CourseConverterTest {
@@ -44,7 +46,7 @@ class CourseConverterTest {
     List<StudentCourse> studentCourseList = List.of(studentCourse1, studentCourse2);
     List<CourseApplication> courseApplicationList = List.of(courseApplication1, courseApplication2);
 
-    List<CourseDetail> actual =  sut.convertCourseDetails(studentCourseList, courseApplicationList);
+    List<CourseDetail> actual =  sut.convertCourseDetailList(studentCourseList, courseApplicationList);
 
     assertThat(actual.size()).isEqualTo(2);
 
@@ -67,9 +69,41 @@ class CourseConverterTest {
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     List<CourseApplication> courseApplicationList = List.of(courseApplication);
 
-    List<CourseDetail> actual =  sut.convertCourseDetails(studentCourseList, courseApplicationList);
+    List<CourseDetail> actual =  sut.convertCourseDetailList(studentCourseList, courseApplicationList);
 
     assertThat(actual.get(0).getStudentCourse()).isEqualTo(studentCourse);
     assertThat(actual.get(0).getCourseApplication()).isNull();
+  }
+
+  @Test
+  void 全項目が正しく変換されること () {
+    SearchResult searchResult = new SearchResult();
+    searchResult.setStudentId("1");
+    searchResult.setCourseId("1");
+    searchResult.setCourseName("テストコース");
+    searchResult.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
+    searchResult.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
+
+    searchResult.setApplicationId("1");
+    searchResult.setApplicationStatus(ApplicationStatus.FORMAL);
+
+    CourseDetail actual = sut.convertCourseDetail(searchResult);
+
+    assertThat(actual.getStudentCourse())
+        .satisfies(studentCourse -> {
+          assertThat(studentCourse.getId()).isEqualTo("1");
+          assertThat(studentCourse.getStudentId()).isEqualTo("1");
+          assertThat(studentCourse.getCourseName()).isEqualTo("テストコース");
+          assertThat(studentCourse.getCourseStartAt()).isEqualTo(LocalDateTime.parse("2026-02-07T16:49:29"));
+          assertThat(studentCourse.getCourseEndAt()).isEqualTo(LocalDateTime.parse("2027-02-07T16:49:29"));
+        });
+
+    assertThat(actual.getCourseApplication())
+        .satisfies(courseApplication -> {
+          assertThat(courseApplication.getId()).isEqualTo("1");
+          assertThat(courseApplication.getStudentId()).isEqualTo("1");
+          assertThat(courseApplication.getCourseId()).isEqualTo("1");
+          assertThat(courseApplication.getApplicationStatus()).isEqualTo(ApplicationStatus.FORMAL);
+        });
   }
 }

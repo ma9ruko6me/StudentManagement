@@ -14,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
-import raisetech.StudentManagement.dto.SearchCondition;
-import raisetech.StudentManagement.dto.StudentSearchCondition;
+import raisetech.StudentManagement.dto.request.ApplicationSearchCondition;
+import raisetech.StudentManagement.dto.request.CourseSearchCondition;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.request.StudentSearchCondition;
+import raisetech.StudentManagement.dto.result.SearchResult;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.enums.SortKey;
@@ -213,6 +216,105 @@ class StudentRepositoryTest {
 
     List<Student> actual = sut.searchStudentByCondition(searchCondition);
     assertThat(actual).extracting(Student::getName).isSortedAccordingTo(Comparator.naturalOrder());
+  }
+
+  @Test
+  void 条件検索_受講生とコース_キーワード_nameとfurigana(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("ゆい");
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual.size()).isEqualTo(3);
+  }
+
+  @Test
+  void 条件検索＿受講生とコース_courseName(){
+    SearchCondition searchCondition = new SearchCondition();
+    CourseSearchCondition courseSearchCondition = new CourseSearchCondition();
+    courseSearchCondition.setCourseName("Javaコース");
+    searchCondition.setCourseSearchCondition(courseSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual.size()).isEqualTo(2);
+  }
+
+  @Test
+  void 条件検索＿受講生とコース_status(){
+    SearchCondition searchCondition = new SearchCondition();
+    ApplicationSearchCondition applicationSearchCondition = new ApplicationSearchCondition();
+    applicationSearchCondition.setApplicationStatus(ApplicationStatus.COMPLETED);
+    searchCondition.setApplicationSearchCondition(applicationSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual.size()).isEqualTo(3);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_AND_名前とstatusの両方一致(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+
+    ApplicationSearchCondition applicationSearchCondition = new ApplicationSearchCondition();
+    applicationSearchCondition.setApplicationStatus(ApplicationStatus.IN_PROGRESS);
+    searchCondition.setApplicationSearchCondition(applicationSearchCondition);
+
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_ANDとORの差_受講生とコース間(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+
+    CourseSearchCondition courseSearchCondition = new CourseSearchCondition();
+    courseSearchCondition.setCourseName("Javaコース");
+
+    SearchCondition andCondition = new SearchCondition();
+    andCondition.setStudentSearchCondition(studentSearchCondition);
+    andCondition.setCourseSearchCondition(courseSearchCondition);
+    andCondition.setSearchType(SearchType.AND);
+
+    SearchCondition orCondition = new SearchCondition();
+    orCondition.setStudentSearchCondition(studentSearchCondition);
+    orCondition.setCourseSearchCondition(courseSearchCondition);
+    orCondition.setSearchType(SearchType.OR);
+
+    List<SearchResult> andResult = sut.searchStudentDetail(andCondition);
+    List<SearchResult> orResult = sut.searchStudentDetail(orCondition);
+
+    assertThat(andResult.size()).isLessThan(orResult.size());
+  }
+
+  @Test
+  void 条件検索_受講生とコース_nameで昇順(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.ASC);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual).extracting(SearchResult::getName).isSortedAccordingTo(Comparator.naturalOrder());
+  }
+
+  @Test
+  void 条件検索＿受講生とコース_条件なし(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    List<SearchResult> actual = sut.searchStudentDetail(searchCondition);
+    assertThat(actual.size()).isEqualTo(10);
   }
 
   @Test

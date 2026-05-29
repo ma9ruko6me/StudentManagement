@@ -10,6 +10,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.result.SearchResult;
 
 class StudentConverterTest {
 
@@ -65,4 +66,31 @@ class StudentConverterTest {
     assertThat(actual.get(0).getCourseDetailList()).isEmpty();
   }
 
+  @Test
+  void 全項目が正しく変換されること(){
+    SearchResult searchResult = new SearchResult();
+    searchResult.setStudentId("1");
+    searchResult.setName("テスト四太郎");
+    searchResult.setFurigana("てすとしたろう");
+    searchResult.setNickname("テスト大好きマン");
+    searchResult.setEmail("test@test.com");
+    searchResult.setArea("テスト県");
+    searchResult.setAge(33);
+    searchResult.setGender("男性");
+    searchResult.setRemark("テストが大好きです。");
+    searchResult.setDeleted(false);
+
+    Student actual = sut.convertStudent(searchResult);
+
+    assertThat(actual.getId()).isEqualTo("1");
+    assertThat(actual.getName()).isEqualTo("テスト四太郎");
+    assertThat(actual.getFurigana()).isEqualTo("てすとしたろう");
+    assertThat(actual.getNickname()).isEqualTo("テスト大好きマン");
+    assertThat(actual.getEmail()).isEqualTo("test@test.com");
+    assertThat(actual.getArea()).isEqualTo("テスト県");
+    assertThat(actual.getAge()).isEqualTo(33);
+    assertThat(actual.getGender()).isEqualTo("男性");
+    assertThat(actual.getRemark()).isEqualTo("テストが大好きです。");
+    assertThat(actual.isDeleted()).isEqualTo(false);
+  }
 }

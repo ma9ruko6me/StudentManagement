@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.SearchCondition;
+import raisetech.StudentManagement.dto.request.SearchCondition;
 import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 

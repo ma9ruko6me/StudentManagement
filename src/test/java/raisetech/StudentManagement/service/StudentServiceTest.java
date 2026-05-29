@@ -28,8 +28,9 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.SearchCondition;
-import raisetech.StudentManagement.dto.StudentSearchCondition;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.request.StudentSearchCondition;
+import raisetech.StudentManagement.dto.result.SearchResult;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.enums.SortKey;
@@ -82,7 +83,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
 
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
     List<StudentDetail> actual = sut.searchStudentList();
@@ -91,7 +92,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudentCourseList();
     verify(repository, times(1)).searchCourseApplicationList();
 
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList, courseApplicationList);
     verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
 
     assertThat(actual).isEqualTo(expected);
@@ -110,7 +111,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
 
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
     List<StudentDetail> actual = sut.searchStudentList();
@@ -119,7 +120,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudentCourseList();
     verify(repository, times(1)).searchCourseApplicationList();
 
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList, courseApplicationList);
     verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
 
     assertThat(actual).isEmpty();
@@ -148,14 +149,14 @@ class StudentServiceTest {
     when(repository.searchStudent(id)).thenReturn(Optional.of(student));
     when(repository.searchStudentCourseByStudentId(id)).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(courseApplicationList);
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
 
     StudentDetail actual = sut.searchStudent(id);
 
     verify(repository, times(1)).searchStudent(id);
     verify(repository, times(1)).searchStudentCourseByStudentId(id);
     verify(repository, times(1)).searchCourseApplicationByStudentId(id);
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList,courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList,courseApplicationList);
 
     assertThat(actual.getStudent()).isEqualTo(expected.getStudent());
     assertThat(actual.getCourseDetailList()).isEqualTo(expected.getCourseDetailList());
@@ -217,7 +218,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
 
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
     List<StudentDetail> actual = sut.searchStudentListByCondition(searchCondition);
@@ -226,7 +227,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudentCourseList();
     verify(repository, times(1)).searchCourseApplicationList();
 
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList, courseApplicationList);
     verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
 
     assertThat(actual).isEqualTo(expected);
@@ -276,6 +277,129 @@ class StudentServiceTest {
             && condition.getSortKey() == SortKey.NAME
             && condition.getSortOrder() == SortOrder.DESC
             && condition.getSearchType() == SearchType.OR
+        ));
+  }
+
+  @Test
+  void 条件検索_リポジトリとコンバーターの呼び出し確認(){
+    SearchCondition searchCondition = new SearchCondition();
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    when(repository.searchStudentDetail(any())).thenReturn(List.of(new SearchResult()));
+    when(studentConverter.convertStudent(any())).thenReturn(new Student());
+    when(courseConverter.convertCourseDetail(any())).thenReturn(new CourseDetail());
+
+    sut.searchStudentDetail(searchCondition);
+
+    verify(repository,times(1)).searchStudentDetail(any());
+    verify(studentConverter).convertStudent(any());
+    verify(courseConverter).convertCourseDetail(any());
+  }
+
+  @Test
+  void 条件検索_受講生とコース_グルーピング () {
+    sut = new StudentService(repository, new StudentConverter(), new CourseConverter());
+
+    SearchCondition searchCondition = new SearchCondition();
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    SearchResult searchResult1 = new SearchResult();
+    searchResult1.setStudentId("1");
+    searchResult1.setName("テスト四太郎");
+    searchResult1.setCourseId("1");
+    searchResult1.setCourseName("テストコースA");
+    searchResult1.setApplicationId("1");
+    searchResult1.setApplicationStatus(ApplicationStatus.FORMAL);
+
+    SearchResult searchResult2 = new SearchResult();
+    searchResult2.setStudentId("1");
+    searchResult2.setName("テスト四太郎");
+    searchResult2.setCourseId("2");
+    searchResult2.setCourseName("テストコースB");
+    searchResult2.setApplicationId("2");
+    searchResult2.setApplicationStatus(ApplicationStatus.TEMP);
+
+    SearchResult searchResult3 = new SearchResult();
+    searchResult3.setStudentId("2");
+    searchResult3.setName("テスト好き子");
+    searchResult3.setCourseId("3");
+    searchResult3.setCourseName("テストコースC");
+    searchResult3.setApplicationId("3");
+    searchResult3.setApplicationStatus(ApplicationStatus.COMPLETED);
+
+    List<SearchResult> searchResultList = List.of(searchResult1, searchResult2, searchResult3);
+
+    when(repository.searchStudentDetail(searchCondition)).thenReturn(searchResultList);
+
+    List<StudentDetail> actual = sut.searchStudentDetail(searchCondition);
+
+    assertThat(actual.size()).isEqualTo(2);
+
+    StudentDetail student1 = actual.stream()
+        .filter(s -> s.getStudent().getId().equals("1"))
+        .findFirst()
+        .orElseThrow();
+
+    assertThat(student1.getCourseDetailList()).hasSize(2);
+
+    StudentDetail student2 = actual.stream()
+        .filter(s -> s.getStudent().getId().equals("2"))
+        .findFirst()
+        .orElseThrow();
+
+    assertThat(student2.getCourseDetailList()).hasSize(1);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_検索条件が全て空(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    assertThatThrownBy(()->sut.searchStudentDetail(searchCondition))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_検索条件がnull(){
+    assertThatThrownBy(()->sut.searchStudentDetail(null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_デフォルトAND(){
+    StudentSearchCondition searchCondition = new StudentSearchCondition();
+    searchCondition.setAgeFrom(0);
+    SearchCondition condition = new SearchCondition();
+    condition.setStudentSearchCondition(searchCondition);
+
+    sut.searchStudentDetail(condition);
+
+    assertThat(condition.getSearchType()).isEqualTo(SearchType.AND);
+  }
+
+  @Test
+  void 条件検索_受講生とコース_検索条件が渡ること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.DESC);
+    searchCondition.setSearchType(SearchType.OR);
+
+    sut.searchStudentDetail(searchCondition);
+
+    verify(repository,times(1))
+        .searchStudentDetail(argThat(condition ->
+            condition.getStudentSearchCondition().getAgeFrom() == 0
+                && condition.getSortKey() == SortKey.NAME
+                && condition.getSortOrder() == SortOrder.DESC
+                && condition.getSearchType() == SearchType.OR
         ));
   }
 

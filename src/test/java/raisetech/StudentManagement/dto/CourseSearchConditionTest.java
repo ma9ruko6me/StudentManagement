@@ -3,6 +3,7 @@ package raisetech.StudentManagement.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import raisetech.StudentManagement.dto.request.CourseSearchCondition;
 
 class CourseSearchConditionTest {
 
