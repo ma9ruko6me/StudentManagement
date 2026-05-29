@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
-import raisetech.StudentManagement.dto.result.SearchResult;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 
 class CourseConverterTest {
@@ -76,18 +76,18 @@ class CourseConverterTest {
   }
 
   @Test
-  void 全項目が正しく変換されること () {
-    SearchResult searchResult = new SearchResult();
-    searchResult.setStudentId("1");
-    searchResult.setCourseId("1");
-    searchResult.setCourseName("テストコース");
-    searchResult.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
-    searchResult.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
+  void フラットな検索結果から受講生コース詳細に正しく変換されること () {
+    StudentCourseApplicationRow studentCourseApplicationRow = new StudentCourseApplicationRow();
+    studentCourseApplicationRow.setStudentId("1");
+    studentCourseApplicationRow.setCourseId("1");
+    studentCourseApplicationRow.setCourseName("テストコース");
+    studentCourseApplicationRow.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
+    studentCourseApplicationRow.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
 
-    searchResult.setApplicationId("1");
-    searchResult.setApplicationStatus(ApplicationStatus.FORMAL);
+    studentCourseApplicationRow.setApplicationId("1");
+    studentCourseApplicationRow.setApplicationStatus(ApplicationStatus.FORMAL);
 
-    CourseDetail actual = sut.convertCourseDetail(searchResult);
+    CourseDetail actual = sut.convertCourseDetail(studentCourseApplicationRow);
 
     assertThat(actual.getStudentCourse())
         .satisfies(studentCourse -> {

@@ -10,7 +10,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.result.SearchResult;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 
 class StudentConverterTest {
 
@@ -67,20 +67,20 @@ class StudentConverterTest {
   }
 
   @Test
-  void 全項目が正しく変換されること(){
-    SearchResult searchResult = new SearchResult();
-    searchResult.setStudentId("1");
-    searchResult.setName("テスト四太郎");
-    searchResult.setFurigana("てすとしたろう");
-    searchResult.setNickname("テスト大好きマン");
-    searchResult.setEmail("test@test.com");
-    searchResult.setArea("テスト県");
-    searchResult.setAge(33);
-    searchResult.setGender("男性");
-    searchResult.setRemark("テストが大好きです。");
-    searchResult.setDeleted(false);
+  void フラットな検索結果から受講生に正しく変換されること(){
+    StudentCourseApplicationRow studentCourseApplicationRow = new StudentCourseApplicationRow();
+    studentCourseApplicationRow.setStudentId("1");
+    studentCourseApplicationRow.setName("テスト四太郎");
+    studentCourseApplicationRow.setFurigana("てすとしたろう");
+    studentCourseApplicationRow.setNickname("テスト大好きマン");
+    studentCourseApplicationRow.setEmail("test@test.com");
+    studentCourseApplicationRow.setArea("テスト県");
+    studentCourseApplicationRow.setAge(33);
+    studentCourseApplicationRow.setGender("男性");
+    studentCourseApplicationRow.setRemark("テストが大好きです。");
+    studentCourseApplicationRow.setDeleted(false);
 
-    Student actual = sut.convertStudent(searchResult);
+    Student actual = sut.convertStudent(studentCourseApplicationRow);
 
     assertThat(actual.getId()).isEqualTo("1");
     assertThat(actual.getName()).isEqualTo("テスト四太郎");

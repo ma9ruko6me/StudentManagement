@@ -1,7 +1,9 @@
 package raisetech.StudentManagement.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
+@Schema(description = "ソートキー（どの項目で並び替えるか指定）")
 public enum SortKey {
 
   NAME("name"),

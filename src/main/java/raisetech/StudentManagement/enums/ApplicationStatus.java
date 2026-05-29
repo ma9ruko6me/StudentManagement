@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Getter;
 
-@Schema(description = "申込状況")
+@Schema(description = "申込状況（受講の進行状態と遷移ルールを表す）")
 public enum ApplicationStatus {
 
   TEMP ("仮申込"),
@@ -29,6 +29,12 @@ public enum ApplicationStatus {
     CANCEL.nextStatuses = List.of();
   }
 
+  /**
+   * 現在のステータスから、指定したステータスへの遷移が可能か判定する。
+   *
+   * @param next　遷移先の申込状況
+   * @return　遷移可能な場合はtrue、不可の場合はfalse
+   */
   public boolean canTransitionTo(ApplicationStatus next) {
     return nextStatuses.contains(next);
   }

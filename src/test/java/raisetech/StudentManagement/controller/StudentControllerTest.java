@@ -99,7 +99,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 条件検索() throws Exception {
+  void 受講生の条件検索が実行できて検索条件が渡されること() throws Exception {
     mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
             .content("""
                   {
@@ -123,7 +123,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 条件検索_一部未指定() throws Exception {
+  void 受講生の条件検索で検索条件が一部未指定でも実行できること() throws Exception {
     mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
             .content("""
                   {
@@ -145,7 +145,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 条件検索_例外が返ってくる() throws Exception {
+  void 受講生の条件検索で検索条件が設定されなかった時に400が返ってくる() throws Exception {
     doThrow(new IllegalArgumentException()).when(service).searchStudentListByCondition(any());
 
     mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON).content(""))

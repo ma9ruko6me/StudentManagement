@@ -7,7 +7,7 @@ import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.dto.request.SearchCondition;
-import raisetech.StudentManagement.dto.result.SearchResult;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 
 /**
  * 受講生テーブル、受講生コース情報テーブル、受講生コース申込状況テーブルと紐づくRepositoryです。
@@ -29,10 +29,6 @@ public interface StudentRepository {
    * @return　受講生
    */
   Optional<Student> searchStudent(String id);
-
-  List<Student> searchStudentByCondition(SearchCondition condition);
-
-  List<SearchResult> searchStudentDetail(SearchCondition condition);
 
   /**
    * 受講生のコース情報の全件検索を行います。
@@ -79,6 +75,14 @@ public interface StudentRepository {
    * @return　受講生コースIDに紐づく受講生コース申込状況
    */
   Optional<CourseApplication> searchCourseApplicationByCourseId(String courseId);
+
+  /**
+   * 受講生詳細の条件検索を行います。
+   *
+   * @param condition 受講生・受講生コース・受講生コース申込状況を横断した検索条件
+   * @return　フラットな検索結果（受講生・受講生コース情報・受講生コース申込状況を含む1レコード）のリスト
+   */
+  List<StudentCourseApplicationRow> searchStudentRows(SearchCondition condition);
 
   /**
    * 受講生を新規登録します。 IDに関しては自動採番を行う。

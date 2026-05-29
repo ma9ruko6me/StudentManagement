@@ -1,5 +1,8 @@
 package raisetech.StudentManagement.exception;
 
+/**
+ * テスト用に意図的にスローさせる例外です。
+ */
 public class TestException extends Exception {
 
   public TestException() {

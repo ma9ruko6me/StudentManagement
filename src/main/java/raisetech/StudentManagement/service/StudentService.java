@@ -17,7 +17,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.request.SearchCondition;
-import raisetech.StudentManagement.dto.result.SearchResult;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
@@ -70,6 +70,12 @@ public class StudentService {
     return new StudentDetail(student, courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList));
   }
 
+  /**
+   * 受講生詳細の条件検索です。受講生・受講生コース・受講生コース申込状況を横断した検索条件で検索し、受講生詳細として返します。
+   *
+   * @param condition 受講生・受講生コース・受講生コース申込状況を横断した検索条件
+   * @return　検索条件に一致した受講生詳細一覧
+   */
   public List<StudentDetail> searchStudentListByCondition(SearchCondition condition) {
     if (condition == null || !condition.hasAnyCondition()) {
       throw new IllegalArgumentException("Condition is null");
@@ -79,29 +85,11 @@ public class StudentService {
       condition.setSearchType(SearchType.AND);
     }
 
-    List<Student> studentList = repository.searchStudentByCondition(condition);
-    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
-
-    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList);
-
-    return studentConverter.convertStudentDetails(studentList, courseDetailList);
-  }
-
-  public List<StudentDetail> searchStudentDetail(SearchCondition condition) {
-    if (condition == null || !condition.hasAnyCondition()) {
-      throw new IllegalArgumentException("Condition is null");
-    }
-
-    if (condition.getSearchType() == null) {
-      condition.setSearchType(SearchType.AND);
-    }
-
-    List<SearchResult> searchResultList = repository.searchStudentDetail(condition);
+    List<StudentCourseApplicationRow> studentCourseApplicationRowList = repository.searchStudentRows(condition);
 
     Map<String,StudentDetail> studentDetailMap = new LinkedHashMap<>();
 
-    for (SearchResult result : searchResultList) {
+    for (StudentCourseApplicationRow result : studentCourseApplicationRowList) {
 
       StudentDetail studentDetail = studentDetailMap.computeIfAbsent(
           result.getStudentId(),

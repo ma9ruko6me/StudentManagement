@@ -1,17 +1,15 @@
 package raisetech.StudentManagement.dto.result;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import raisetech.StudentManagement.enums.ApplicationStatus;
 
-@Schema(description = "検索結果")
+@Schema(description = "受講生・受講生コース情報・受講生コース申込状況を結合した検索結果（フラット構造）")
 @Getter
 @Setter
-public class SearchResult {
+public class StudentCourseApplicationRow {
 
   private String studentId;
   private String name;

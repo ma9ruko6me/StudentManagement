@@ -7,19 +7,19 @@ import org.springframework.stereotype.Component;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.result.SearchResult;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 
 /**
- * 受講生詳細を受講生や受講生コース情報、もしくはその逆の変換を行うコンバーターです。
+ * 受講生と受講生コース詳細を相互に変換し、受講生詳細を生成するコンバーターです。
  */
 @Component
 public class StudentConverter {
 
   /**
-   * 受講生に紐づく受講生コース情報をマッピングする。 受講生コース情報は受講生に対して複数存在するのでループを回して受講生詳細情報を組み立てる。
+   * 受講生と受講生コース詳細を紐付けて受講生詳細に変換する。
    *
-   * @param studentList       受講生一覧
-   * @param courseDetailList 受講生コース情報のリスト
+   * @param studentList 受講生コース情報のリスト
+   * @param courseDetailList 受講生コース申込状況のリスト
    * @return　受講生詳細情報のリスト
    */
   public List<StudentDetail> convertStudentDetails(List<Student> studentList,
@@ -39,18 +39,24 @@ public class StudentConverter {
     return studentDetails;
   }
 
-  public Student convertStudent(SearchResult searchResult) {
+  /**
+   * フラットな検索結果から受講生へ変換する。
+   *
+   * @param studentCourseApplicationRow フラットな検索結果（受講生・受講生コース情報・受講生コース申込状況を含む1レコード）
+   * @return 受講生
+   */
+  public Student convertStudent(StudentCourseApplicationRow studentCourseApplicationRow) {
     Student student = new Student();
-    student.setId(searchResult.getStudentId());
-    student.setName(searchResult.getName());
-    student.setFurigana(searchResult.getFurigana());
-    student.setNickname(searchResult.getNickname());
-    student.setEmail(searchResult.getEmail());
-    student.setArea(searchResult.getArea());
-    student.setAge(searchResult.getAge());
-    student.setGender(searchResult.getGender());
-    student.setRemark(searchResult.getRemark());
-    student.setDeleted(searchResult.isDeleted());
+    student.setId(studentCourseApplicationRow.getStudentId());
+    student.setName(studentCourseApplicationRow.getName());
+    student.setFurigana(studentCourseApplicationRow.getFurigana());
+    student.setNickname(studentCourseApplicationRow.getNickname());
+    student.setEmail(studentCourseApplicationRow.getEmail());
+    student.setArea(studentCourseApplicationRow.getArea());
+    student.setAge(studentCourseApplicationRow.getAge());
+    student.setGender(studentCourseApplicationRow.getGender());
+    student.setRemark(studentCourseApplicationRow.getRemark());
+    student.setDeleted(studentCourseApplicationRow.isDeleted());
     return student;
   }
 }
