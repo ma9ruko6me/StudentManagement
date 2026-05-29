@@ -17,6 +17,6 @@ public class CourseSearchCondition {
    * @return　全てnullまたは空文字の場合はtrue、それ以外はfalse
    */
   public boolean isEmpty() {
-    return courseName == null;
+    return courseName == null  || courseName.isBlank();
   }
 }

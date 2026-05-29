@@ -48,7 +48,7 @@
       <choose>
 
         <!--AND検索-->
-        <when test="searchType == @raisetech.StudentManagement.enums.SearchType@AND">
+        <when test="searchType != null and searchType.name() == 'AND'">
 
           <if test="studentSearchCondition != null and studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
             <trim prefix="AND (" suffix=")" prefixOverrides="OR">
@@ -57,11 +57,11 @@
             </trim>
           </if>
 
-          <if test="studentSearchCondition != null and studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
+          <if test="studentSearchCondition != null and studentSearchCondition.ageFrom != null">
             AND s.age >= #{studentSearchCondition.ageFrom}
           </if>
 
-          <if test="studentSearchCondition != null and studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
+          <if test="studentSearchCondition != null and studentSearchCondition.ageTo != null">
             AND s.age &lt;= #{studentSearchCondition.ageTo}
           </if>
 
@@ -71,6 +71,10 @@
 
           <if test="studentSearchCondition != null and studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
             AND s.gender = #{studentSearchCondition.gender}
+          </if>
+
+          <if test="studentSearchCondition != null and studentSearchCondition.isDeleted != null">
+            AND s.is_deleted = #{studentSearchCondition.isDeleted}
           </if>
 
           <if test="courseSearchCondition != null and courseSearchCondition.courseName != null and courseSearchCondition.courseName !=''">
@@ -84,7 +88,7 @@
         </when>
 
         <!--OR検索-->
-        <when test="searchType == @raisetech.StudentManagement.enums.SearchType@OR">
+        <when test="searchType != null and searchType.name() == 'OR'">
           <if test="studentSearchCondition != null and studentSearchCondition.keyword != null and studentSearchCondition.keyword !=''">
             <trim prefix="OR (" suffix=")" prefixOverrides="OR">
               OR s.name LIKE CONCAT('%', #{studentSearchCondition.keyword}, '%')
@@ -92,11 +96,11 @@
             </trim>
           </if>
 
-          <if test="studentSearchCondition != null and studentSearchCondition.ageFrom != null and studentSearchCondition.ageFrom !=''">
+          <if test="studentSearchCondition != null and studentSearchCondition.ageFrom != null">
             OR s.age >= #{studentSearchCondition.ageFrom}
           </if>
 
-          <if test="studentSearchCondition != null and studentSearchCondition.ageTo != null and studentSearchCondition.ageTo !=''">
+          <if test="studentSearchCondition != null and studentSearchCondition.ageTo != null">
             OR s.age &lt;= #{studentSearchCondition.ageTo}
           </if>
 
@@ -106,6 +110,10 @@
 
           <if test="studentSearchCondition != null and studentSearchCondition.gender != null and studentSearchCondition.gender !=''">
             OR s.gender = #{studentSearchCondition.gender}
+          </if>
+
+          <if test="studentSearchCondition != null and studentSearchCondition.isDeleted != null">
+            OR s.is_deleted = #{studentSearchCondition.isDeleted}
           </if>
 
           <if test="courseSearchCondition != null and courseSearchCondition.courseName != null and courseSearchCondition.courseName !=''">

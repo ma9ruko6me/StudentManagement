@@ -22,12 +22,18 @@ public class StudentSearchCondition {
 
   private String gender;
 
+  private Boolean isDeleted;
+
   /**
    * 全ての検索条件が未指定かどうかを判定する。
    *
    * @return　全てnullまたは空文字の場合はtrue、それ以外はfalse
    */
   public boolean isEmpty() {
-    return keyword == null && ageFrom == null && ageTo == null && area == null  && gender == null;
+    return (keyword == null || keyword.isBlank())
+        && ageFrom == null
+        && ageTo == null
+        && (area == null || area.isBlank())
+        && (gender == null || gender.isBlank());
   }
 }
