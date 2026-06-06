@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.request.SearchCondition;
 import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -52,6 +53,17 @@ public class StudentController {
   @GetMapping("/student/{id}")
   public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
     return ResponseEntity.ok(service.searchStudent(id));
+  }
+
+  /**
+   * 受講生詳細の条件検索です。受講生・受講生コース・受講生コース申込状況を横断した検索条件に一致して受講生情報を取得します。
+   *
+   * @param searchCondition 受講生・受講生コース・受講生コース申込状況を横断した検索条件
+   * @return　検索条件に一致した受講生詳細一覧
+   */
+  @PostMapping("/studentListByCondition")
+  public ResponseEntity<List<StudentDetail>> getStudentListByCondition(@RequestBody @Valid SearchCondition searchCondition) {
+    return ResponseEntity.ok(service.searchStudentListByCondition(searchCondition));
   }
 
   /**

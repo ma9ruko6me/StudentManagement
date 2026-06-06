@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.dto.request.ApplicationSearchCondition;
+import raisetech.StudentManagement.dto.request.CourseSearchCondition;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.request.StudentSearchCondition;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -24,7 +33,7 @@ class StudentRepositoryTest {
   @Test
   void 受講生の全件検索ができること() {
     List<Student> actual =sut.search();
-    assertThat(actual.size()).isEqualTo(5);
+    assertThat(actual.size()).isEqualTo(6);
   }
 
   @Test
@@ -49,9 +58,108 @@ class StudentRepositoryTest {
   }
 
   @Test
+  void 受講生の条件検索でキーワードに一致したnameとfuriganaを持つ受講生が取得できること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("ゆい");
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual.size()).isEqualTo(3);
+  }
+
+  @Test
+  void 受講生の条件検索でcourseNameに一致した受講生が取得できること(){
+    SearchCondition searchCondition = new SearchCondition();
+    CourseSearchCondition courseSearchCondition = new CourseSearchCondition();
+    courseSearchCondition.setCourseName("Javaコース");
+    searchCondition.setCourseSearchCondition(courseSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual.size()).isEqualTo(2);
+  }
+
+  @Test
+  void 受講生の条件検索でapplicationStatusに一致した受講生が取得できること(){
+    SearchCondition searchCondition = new SearchCondition();
+    ApplicationSearchCondition applicationSearchCondition = new ApplicationSearchCondition();
+    applicationSearchCondition.setApplicationStatus(ApplicationStatus.COMPLETED);
+    searchCondition.setApplicationSearchCondition(applicationSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual.size()).isEqualTo(3);
+  }
+
+  @Test
+  void 受講生の条件検索でAND検索をした時に名前とapplicationStatusの両方に一致した受講生を取得できること(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+
+    ApplicationSearchCondition applicationSearchCondition = new ApplicationSearchCondition();
+    applicationSearchCondition.setApplicationStatus(ApplicationStatus.IN_PROGRESS);
+    searchCondition.setApplicationSearchCondition(applicationSearchCondition);
+
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @Test
+  void 受講生の条件検索で同じ条件でAND検索とOR検索をした時に結果が異なること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setKeyword("鈴木");
+
+    CourseSearchCondition courseSearchCondition = new CourseSearchCondition();
+    courseSearchCondition.setCourseName("Javaコース");
+
+    SearchCondition andCondition = new SearchCondition();
+    andCondition.setStudentSearchCondition(studentSearchCondition);
+    andCondition.setCourseSearchCondition(courseSearchCondition);
+    andCondition.setSearchType(SearchType.AND);
+
+    SearchCondition orCondition = new SearchCondition();
+    orCondition.setStudentSearchCondition(studentSearchCondition);
+    orCondition.setCourseSearchCondition(courseSearchCondition);
+    orCondition.setSearchType(SearchType.OR);
+
+    List<StudentCourseApplicationRow> andResult = sut.searchStudentRows(andCondition);
+    List<StudentCourseApplicationRow> orResult = sut.searchStudentRows(orCondition);
+
+    assertThat(andResult.size()).isLessThan(orResult.size());
+  }
+
+  @Test
+  void 受講生の条件検索でnameで昇順にソートできること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.ASC);
+    searchCondition.setSearchType(SearchType.AND);
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual).extracting(StudentCourseApplicationRow::getName).isSortedAccordingTo(Comparator.naturalOrder());
+  }
+
+  @Test
+  void 条件検索＿受講生とコース_条件なし(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    List<StudentCourseApplicationRow> actual = sut.searchStudentRows(searchCondition);
+    assertThat(actual.size()).isEqualTo(10);
+  }
+
+  @Test
   void 受講生コース情報の全件検索ができること() {
     List<StudentCourse> actual =sut.searchStudentCourseList();
-    assertThat(actual.size()).isEqualTo(9);
+    assertThat(actual.size()).isEqualTo(10);
   }
 
   @Test
@@ -78,7 +186,7 @@ class StudentRepositoryTest {
         .satisfies(studentCourse -> {
           assertThat(studentCourse.getId()).isEqualTo(id);
           assertThat(studentCourse.getStudentId()).isEqualTo("1");
-          assertThat(studentCourse.getCourse()).isEqualTo("Javaコース");
+          assertThat(studentCourse.getCourseName()).isEqualTo("Javaコース");
         });
   }
 
@@ -92,7 +200,7 @@ class StudentRepositoryTest {
   @Test
   void 受講生コース申込状況の全件検索ができること() {
     List<CourseApplication> actual =sut.searchCourseApplicationList();
-    assertThat(actual.size()).isEqualTo(9);
+    assertThat(actual.size()).isEqualTo(10);
   }
 
   @Test
@@ -104,7 +212,7 @@ class StudentRepositoryTest {
             CourseApplication::getId,
             CourseApplication::getStudentId,
             CourseApplication::getCourseId,
-            CourseApplication::getStatus
+            CourseApplication::getApplicationStatus
         )
         .contains(
             tuple("1","1","1",ApplicationStatus.IN_PROGRESS)
@@ -138,7 +246,7 @@ class StudentRepositoryTest {
           assertThat(courseApplication.getId()).isEqualTo(id);
           assertThat(courseApplication.getStudentId()).isEqualTo("1");
           assertThat(courseApplication.getCourseId()).isEqualTo("1");
-          assertThat(courseApplication.getStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
+          assertThat(courseApplication.getApplicationStatus()).isEqualTo(ApplicationStatus.IN_PROGRESS);
         });
   }
 
@@ -153,7 +261,7 @@ class StudentRepositoryTest {
   void 受講生の登録が行えること () {
     Student student = new Student();
     student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
+    student.setFurigana("てすとしたろう");
     student.setNickname("テスト大好きくん");
     student.setEmail("test@example.com");
     student.setArea("テスト県");
@@ -165,7 +273,7 @@ class StudentRepositoryTest {
     sut.registerStudent(student);
 
     List<Student> actual =sut.search();
-    assertThat(actual.size()).isEqualTo(6);
+    assertThat(actual.size()).isEqualTo(7);
     assertThat(student.getId()).isNotNull();
   }
 
@@ -173,35 +281,35 @@ class StudentRepositoryTest {
   void 受講生コース情報の登録ができること() {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
-    studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
-    studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
+    studentCourse.setCourseName("テストコース");
+    studentCourse.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
+    studentCourse.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
 
     sut.registerStudentCourse(studentCourse);
 
     List<StudentCourse> actual =sut.searchStudentCourseList();
-    assertThat(actual.size()).isEqualTo(10);
+    assertThat(actual.size()).isEqualTo(11);
     assertThat(studentCourse.getId()).isNotNull();
   }
 
   @Test
   void 受講生コース申込状況の登録ができること() {
     CourseApplication courseApplication = new CourseApplication();
-    courseApplication.setStudentId("10");
-    courseApplication.setCourseId("10");
-    courseApplication.setStatus(ApplicationStatus.TEMP);
+    courseApplication.setStudentId("99");
+    courseApplication.setCourseId("99");
+    courseApplication.setApplicationStatus(ApplicationStatus.TEMP);
 
     sut.registerCourseApplication(courseApplication);
 
     List<CourseApplication> actual =sut.searchCourseApplicationList();
-    assertThat(actual.size()).isEqualTo(10);
+    assertThat(actual.size()).isEqualTo(11);
     assertThat(actual)
         .extracting(
             CourseApplication::getStudentId,
             CourseApplication::getCourseId,
-            CourseApplication::getStatus
+            CourseApplication::getApplicationStatus
         )
-        .contains(tuple("10","10",ApplicationStatus.TEMP));
+        .contains(tuple("99","99",ApplicationStatus.TEMP));
     assertThat(courseApplication.getId()).isNotNull();
   }
 
@@ -243,9 +351,9 @@ class StudentRepositoryTest {
     StudentCourse expected = new StudentCourse();
     expected.setId(before.getId());
     expected.setStudentId(before.getStudentId());
-    expected.setCourse("テストコース");
-    expected.setStartDate(before.getStartDate());
-    expected.setEndDate(before.getEndDate());
+    expected.setCourseName("テストコース");
+    expected.setCourseStartAt(before.getCourseStartAt());
+    expected.setCourseEndAt(before.getCourseEndAt());
 
     sut.updateStudentCourse(expected);
 
@@ -259,9 +367,9 @@ class StudentRepositoryTest {
           assertThat(studentCourse.getStudentId())
               .isEqualTo(before.getStudentId());
 
-          assertThat(studentCourse.getCourse())
-              .isEqualTo(expected.getCourse())
-              .isNotEqualTo(before.getCourse());
+          assertThat(studentCourse.getCourseName())
+              .isEqualTo(expected.getCourseName())
+              .isNotEqualTo(before.getCourseName());
         });
   }
 
@@ -273,7 +381,7 @@ class StudentRepositoryTest {
     expected.setId(before.getId());
     expected.setStudentId(before.getStudentId());
     expected.setCourseId(before.getCourseId());
-    expected.setStatus(ApplicationStatus.FORMAL);
+    expected.setApplicationStatus(ApplicationStatus.FORMAL);
 
     sut.updateCourseApplication(expected);
 
@@ -284,9 +392,9 @@ class StudentRepositoryTest {
       assertThat(courseApplication.getStudentId()).isEqualTo(before.getStudentId());
       assertThat(courseApplication.getCourseId()).isEqualTo(before.getCourseId());
 
-      assertThat(courseApplication.getStatus())
-          .isEqualTo(expected.getStatus())
-          .isNotEqualTo(before.getStatus());
+      assertThat(courseApplication.getApplicationStatus())
+          .isEqualTo(expected.getApplicationStatus())
+          .isNotEqualTo(before.getApplicationStatus());
     });
   }
 }

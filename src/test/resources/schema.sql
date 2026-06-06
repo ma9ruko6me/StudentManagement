@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS students
 (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50),
-    hurigana VARCHAR(50),
+    furigana VARCHAR(50),
     nickname VARCHAR(50),
     age INT,
     email VARCHAR(50),
@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS students_courses
 (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     student_id BIGINT NOT NULL,
-    course VARCHAR(50),
-    start_date TIMESTAMP,
-    end_date TIMESTAMP
+    course_name VARCHAR(50),
+    course_start_at TIMESTAMP,
+    course_end_at TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS course_applications
@@ -26,5 +26,5 @@ CREATE TABLE IF NOT EXISTS course_applications
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     student_id BIGINT NOT NULL,
     course_id BIGINT NOT NULL UNIQUE,
-    status VARCHAR(20) NOT NULL
+    application_status VARCHAR(20) NOT NULL
 );

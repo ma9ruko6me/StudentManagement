@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+/**
+ * アプリケーション全体の例外をハンドリングし、統一されたエラーレスポンスを返すクラスです。
+ */
 @ControllerAdvice
 public class StudentExceptionHandler {
 

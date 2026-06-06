@@ -2,6 +2,7 @@ package raisetech.StudentManagement.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -31,6 +32,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.enums.SearchType;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
@@ -95,6 +99,60 @@ class StudentControllerTest {
   }
 
   @Test
+  void 受講生の条件検索が実行できて検索条件が渡されること() throws Exception {
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                  {
+                    "studentSearchCondition":{"keyword":"テスト"},
+                    "sortKey":"AGE",
+                    "sortOrder":"DESC",
+                    "searchType":"AND"
+                  }
+                """))
+        .andExpect(status().isOk());
+
+    verify(service,times(1)).searchStudentListByCondition(argThat(searchCondition ->
+            searchCondition.getStudentSearchCondition() != null
+            && "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+
+            && searchCondition.getSortKey() == SortKey.AGE
+            && searchCondition.getSortOrder() == SortOrder.DESC
+            && searchCondition.getSearchType() == SearchType.AND
+
+        ));
+  }
+
+  @Test
+  void 受講生の条件検索で検索条件が一部未指定でも実行できること() throws Exception {
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                  {
+                    "studentSearchCondition":{"keyword":"テスト"},
+                    "searchType":"OR"
+                  }
+                """))
+        .andExpect(status().isOk());
+
+    verify(service,times(1)).searchStudentListByCondition(argThat(searchCondition ->
+        searchCondition.getStudentSearchCondition() != null
+            && "テスト".equals(searchCondition.getStudentSearchCondition().getKeyword())
+
+            && searchCondition.getSortKey() == null
+            && searchCondition.getSortOrder() == null
+            && searchCondition.getSearchType() == SearchType.OR
+
+    ));
+  }
+
+  @Test
+  void 受講生の条件検索で検索条件が設定されなかった時に400が返ってくる() throws Exception {
+    doThrow(new IllegalArgumentException()).when(service).searchStudentListByCondition(any());
+
+    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON).content(""))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void 受講生詳細の登録が実行できること() throws Exception {
     when(service.registerStudent(any())).thenReturn(new StudentDetail());
 
@@ -103,7 +161,7 @@ class StudentControllerTest {
                     {
                         "student": {
                             "name": "久保建英",
-                            "hurigana": "くぼたけふさ",
+                            "furigana": "くぼたけふさ",
                             "nickname": "タケ",
                             "email": "take.kubo@example.com",
                             "area": "神奈川県",
@@ -114,7 +172,7 @@ class StudentControllerTest {
                         "courseDetailList": [
                              {
                                "studentCourse": {
-                                 "course": "デザインコース"
+                                 "courseName": "デザインコース"
                                }
                              }
                         ]
@@ -138,7 +196,7 @@ class StudentControllerTest {
         .hasSize(1)
         .first()
         .satisfies(courseDetail -> {
-          assertThat(courseDetail.getStudentCourse().getCourse()).isEqualTo("デザインコース");
+          assertThat(courseDetail.getStudentCourse().getCourseName()).isEqualTo("デザインコース");
         });
   }
 
@@ -149,7 +207,7 @@ class StudentControllerTest {
     mockMvc.perform(post("/addCourse/999")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
-                {"studentCourse": {"course": "デザインコース"}}
+                {"studentCourse": {"courseName": "デザインコース"}}
                 """))
         .andExpect(status().isOk());
 
@@ -159,7 +217,7 @@ class StudentControllerTest {
     verify(service, times(1)).addCourseDetail(idCaptor.capture(),courseDetailCaptor.capture());
 
     assertThat(idCaptor.getValue()).isEqualTo("999");
-    assertThat(courseDetailCaptor.getValue().getStudentCourse().getCourse()).isEqualTo("デザインコース");
+    assertThat(courseDetailCaptor.getValue().getStudentCourse().getCourseName()).isEqualTo("デザインコース");
   }
 
   @Test
@@ -169,7 +227,7 @@ class StudentControllerTest {
 
     mockMvc.perform(post("/addCourse/999").contentType(MediaType.APPLICATION_JSON)
             .content("""
-                {"studentCourse": {"course": "デザインコース"}}
+                {"studentCourse": {"courseName": "デザインコース"}}
                 """))
         .andExpect(status().isNotFound());
   }
@@ -181,7 +239,7 @@ class StudentControllerTest {
                     {
                          "id": "2",
                          "name": "久保建英",
-                         "hurigana": "くぼたけふさ",
+                         "furigana": "くぼたけふさ",
                          "nickname": "タケ",
                          "email": "take.kubo@example.com",
                          "area": "神奈川県",
@@ -205,7 +263,7 @@ class StudentControllerTest {
               {
                 "id": "2",
                 "name": "久保建英",
-                "hurigana": "くぼたけふさ",
+                "furigana": "くぼたけふさ",
                 "nickname": "タケ",
                 "email": "take.kubo@example.com",
                 "area": "神奈川県",
@@ -224,15 +282,13 @@ class StudentControllerTest {
                   {"studentCourse": {
                   "id": "6",
                   "studentId": "2",
-                  "course": "デザインコース",
-                  "startDate": "2025-10-07",
-                  "endDate": "2026-06-23"
+                  "courseName": "デザインコース"
                 },
                 "courseApplication": {
                   "id": "6",
                   "studentId": "2",
                   "courseId": "6",
-                  "status": "FORMAL"
+                  "applicationStatus": "FORMAL"
                 }}
                 """))
         .andExpect(status().isOk())
@@ -250,11 +306,11 @@ class StudentControllerTest {
               {
                  "studentCourse": {
                     "id": "6",
-                    "course": "デザインコース"
+                    "courseName": "デザインコース"
                  },
                  "courseApplication": {
                     "id": "6",
-                    "status": "FORMAL"
+                    "applicationStatus": "FORMAL"
                  }
               }
             """))
@@ -269,11 +325,11 @@ class StudentControllerTest {
               {
                  "studentCourse": {
                     "id": "6",
-                    "course": "デザインコース"
+                    "courseName": "デザインコース"
                  },
                  "courseApplication": {
                     "id": "6",
-                    "status": "FORMAL"
+                    "applicationStatus": "FORMAL"
                  }
               }
             """))
@@ -355,7 +411,7 @@ class StudentControllerTest {
     Student student = new Student();
     student.setId("1");
     student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
+    student.setFurigana("てすとしたろう");
     student.setNickname("テスト大好きくん");
     student.setEmail("test@example.com");
     student.setArea("テスト県");

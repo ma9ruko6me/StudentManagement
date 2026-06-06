@@ -1,7 +1,10 @@
 package raisetech.StudentManagement.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,10 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -45,7 +51,7 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
     List<CourseApplication>  courseApplicationList = repository.searchCourseApplicationList();
 
-    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetails(studentCourseList, courseApplicationList);
+    List<CourseDetail> courseDetailList = courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList);
 
     return studentConverter.convertStudentDetails(studentList, courseDetailList);
   }
@@ -61,7 +67,47 @@ public class StudentService {
         .orElseThrow(() -> new ResourceNotFoundException("Student not found" + id));
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
-    return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+    return new StudentDetail(student, courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList));
+  }
+
+  /**
+   * 受講生詳細の条件検索です。受講生・受講生コース・受講生コース申込状況を横断した検索条件で検索し、受講生詳細として返します。
+   *
+   * @param condition 受講生・受講生コース・受講生コース申込状況を横断した検索条件
+   * @return　検索条件に一致した受講生詳細一覧
+   */
+  public List<StudentDetail> searchStudentListByCondition(SearchCondition condition) {
+    if (condition == null || !condition.hasAnyCondition()) {
+      throw new IllegalArgumentException("Condition is null");
+    }
+
+    if (condition.getSearchType() == null) {
+      condition.setSearchType(SearchType.AND);
+    }
+
+    List<StudentCourseApplicationRow> studentCourseApplicationRowList = repository.searchStudentRows(condition);
+
+    Map<String,StudentDetail> studentDetailMap = new LinkedHashMap<>();
+
+    for (StudentCourseApplicationRow result : studentCourseApplicationRowList) {
+
+      StudentDetail studentDetail = studentDetailMap.computeIfAbsent(
+          result.getStudentId(),
+          id -> {
+            StudentDetail detail = new StudentDetail();
+            detail.setStudent(studentConverter.convertStudent(result));
+            detail.setCourseDetailList(new ArrayList<>());
+            return detail;
+          }
+      );
+
+      CourseDetail courseDetail = courseConverter.convertCourseDetail(result);
+
+      studentDetail.getCourseDetailList().add(courseDetail);
+
+    }
+
+    return new ArrayList<>(studentDetailMap.values());
   }
 
   /**
@@ -112,7 +158,7 @@ public class StudentService {
     List<StudentCourse> studentCourseList = repository.searchStudentCourseByStudentId(id);
     List<CourseApplication> courseApplicationList = repository.searchCourseApplicationByStudentId(id);
 
-    return new StudentDetail(student, courseConverter.convertCourseDetails(studentCourseList, courseApplicationList));
+    return new StudentDetail(student, courseConverter.convertCourseDetailList(studentCourseList, courseApplicationList));
   }
 
   /**
@@ -123,11 +169,11 @@ public class StudentService {
    */
   private void initStudentCourse(CourseDetail courseDetail,String studentId) {
     StudentCourse studentCourse = courseDetail.getStudentCourse();
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
 
     studentCourse.setStudentId(studentId);
-    studentCourse.setStartDate(now);
-    studentCourse.setEndDate(now.plusYears(1));
+    studentCourse.setCourseStartAt(now);
+    studentCourse.setCourseEndAt(now.plusYears(1));
   }
 
   /**
@@ -141,7 +187,7 @@ public class StudentService {
 
     courseApplication.setStudentId(studentId);
     courseApplication.setCourseId(courseDetail.getStudentCourse().getId());
-    courseApplication.setStatus(ApplicationStatus.TEMP);
+    courseApplication.setApplicationStatus(ApplicationStatus.TEMP);
   }
 
   /**
@@ -174,8 +220,8 @@ public class StudentService {
     CourseApplication courseApplication = repository.searchCourseApplicationByCourseId(courseId)
         .orElseThrow(() -> new ResourceNotFoundException("Application not found" + courseId));
 
-    ApplicationStatus currentStatus = courseApplication.getStatus();
-    ApplicationStatus nextStatus = courseDetail.getCourseApplication().getStatus();
+    ApplicationStatus currentStatus = courseApplication.getApplicationStatus();
+    ApplicationStatus nextStatus = courseDetail.getCourseApplication().getApplicationStatus();
 
     if (!currentStatus.canTransitionTo(nextStatus)) {
       throw new InvalidStatusTransitionException("Invalid status transition");

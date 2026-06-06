@@ -10,6 +10,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 
 class StudentConverterTest {
 
@@ -28,7 +29,7 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setStudentId("1");
-    studentCourse.setCourse("テストコース");
+    studentCourse.setCourseName("テストコース");
 
     CourseDetail courseDetail = new CourseDetail();
     courseDetail.setStudentCourse(studentCourse);
@@ -51,7 +52,7 @@ class StudentConverterTest {
     StudentCourse studentCourse1 = new StudentCourse();
     studentCourse1.setId("1");
     studentCourse1.setStudentId("2");
-    studentCourse1.setCourse("テストコース");
+    studentCourse1.setCourseName("テストコース");
 
     CourseDetail courseDetail = new CourseDetail();
     courseDetail.setStudentCourse(studentCourse1);
@@ -65,4 +66,31 @@ class StudentConverterTest {
     assertThat(actual.get(0).getCourseDetailList()).isEmpty();
   }
 
+  @Test
+  void フラットな検索結果から受講生に正しく変換されること(){
+    StudentCourseApplicationRow studentCourseApplicationRow = new StudentCourseApplicationRow();
+    studentCourseApplicationRow.setStudentId("1");
+    studentCourseApplicationRow.setName("テスト四太郎");
+    studentCourseApplicationRow.setFurigana("てすとしたろう");
+    studentCourseApplicationRow.setNickname("テスト大好きマン");
+    studentCourseApplicationRow.setEmail("test@test.com");
+    studentCourseApplicationRow.setArea("テスト県");
+    studentCourseApplicationRow.setAge(33);
+    studentCourseApplicationRow.setGender("男性");
+    studentCourseApplicationRow.setRemark("テストが大好きです。");
+    studentCourseApplicationRow.setDeleted(false);
+
+    Student actual = sut.convertStudent(studentCourseApplicationRow);
+
+    assertThat(actual.getId()).isEqualTo("1");
+    assertThat(actual.getName()).isEqualTo("テスト四太郎");
+    assertThat(actual.getFurigana()).isEqualTo("てすとしたろう");
+    assertThat(actual.getNickname()).isEqualTo("テスト大好きマン");
+    assertThat(actual.getEmail()).isEqualTo("test@test.com");
+    assertThat(actual.getArea()).isEqualTo("テスト県");
+    assertThat(actual.getAge()).isEqualTo(33);
+    assertThat(actual.getGender()).isEqualTo("男性");
+    assertThat(actual.getRemark()).isEqualTo("テストが大好きです。");
+    assertThat(actual.isDeleted()).isEqualTo(false);
+  }
 }

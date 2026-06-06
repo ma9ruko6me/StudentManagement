@@ -4,13 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.annotation.Nonnull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,13 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.CourseDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.request.SearchCondition;
+import raisetech.StudentManagement.dto.request.StudentSearchCondition;
+import raisetech.StudentManagement.dto.result.StudentCourseApplicationRow;
 import raisetech.StudentManagement.enums.ApplicationStatus;
+import raisetech.StudentManagement.enums.SearchType;
+import raisetech.StudentManagement.enums.SortKey;
+import raisetech.StudentManagement.enums.SortOrder;
 import raisetech.StudentManagement.exception.InvalidStatusTransitionException;
 import raisetech.StudentManagement.exception.ResourceNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -76,7 +83,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
 
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
     List<StudentDetail> actual = sut.searchStudentList();
@@ -85,7 +92,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudentCourseList();
     verify(repository, times(1)).searchCourseApplicationList();
 
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList, courseApplicationList);
     verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
 
     assertThat(actual).isEqualTo(expected);
@@ -104,7 +111,7 @@ class StudentServiceTest {
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationList()).thenReturn(courseApplicationList);
 
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
     when(studentConverter.convertStudentDetails(studentList,courseDetailList)).thenReturn(expected);
 
     List<StudentDetail> actual = sut.searchStudentList();
@@ -113,7 +120,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudentCourseList();
     verify(repository, times(1)).searchCourseApplicationList();
 
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList, courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList, courseApplicationList);
     verify(studentConverter, times(1)).convertStudentDetails(studentList,courseDetailList);
 
     assertThat(actual).isEmpty();
@@ -142,14 +149,14 @@ class StudentServiceTest {
     when(repository.searchStudent(id)).thenReturn(Optional.of(student));
     when(repository.searchStudentCourseByStudentId(id)).thenReturn(studentCourseList);
     when(repository.searchCourseApplicationByStudentId(id)).thenReturn(courseApplicationList);
-    when(courseConverter.convertCourseDetails(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
+    when(courseConverter.convertCourseDetailList(studentCourseList,courseApplicationList)).thenReturn(courseDetailList);
 
     StudentDetail actual = sut.searchStudent(id);
 
     verify(repository, times(1)).searchStudent(id);
     verify(repository, times(1)).searchStudentCourseByStudentId(id);
     verify(repository, times(1)).searchCourseApplicationByStudentId(id);
-    verify(courseConverter, times(1)).convertCourseDetails(studentCourseList,courseApplicationList);
+    verify(courseConverter, times(1)).convertCourseDetailList(studentCourseList,courseApplicationList);
 
     assertThat(actual.getStudent()).isEqualTo(expected.getStudent());
     assertThat(actual.getCourseDetailList()).isEqualTo(expected.getCourseDetailList());
@@ -181,6 +188,131 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生の条件検索_リポジトリとコンバーターの処理が適切に呼び出せていること(){
+    SearchCondition searchCondition = new SearchCondition();
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    when(repository.searchStudentRows(any())).thenReturn(List.of(new StudentCourseApplicationRow()));
+    when(studentConverter.convertStudent(any())).thenReturn(new Student());
+    when(courseConverter.convertCourseDetail(any())).thenReturn(new CourseDetail());
+
+    sut.searchStudentListByCondition(searchCondition);
+
+    verify(repository,times(1)).searchStudentRows(any());
+    verify(studentConverter).convertStudent(any());
+    verify(courseConverter).convertCourseDetail(any());
+  }
+
+  @Test
+  void 受講生の条件検索_フラットな検索結果を受講生ごとにグルーピングできること () {
+    sut = new StudentService(repository, new StudentConverter(), new CourseConverter());
+
+    SearchCondition searchCondition = new SearchCondition();
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSearchType(SearchType.AND);
+
+    StudentCourseApplicationRow studentCourseApplicationRow1 = new StudentCourseApplicationRow();
+    studentCourseApplicationRow1.setStudentId("1");
+    studentCourseApplicationRow1.setName("テスト四太郎");
+    studentCourseApplicationRow1.setCourseId("1");
+    studentCourseApplicationRow1.setCourseName("テストコースA");
+    studentCourseApplicationRow1.setApplicationId("1");
+    studentCourseApplicationRow1.setApplicationStatus(ApplicationStatus.FORMAL);
+
+    StudentCourseApplicationRow studentCourseApplicationRow2 = new StudentCourseApplicationRow();
+    studentCourseApplicationRow2.setStudentId("1");
+    studentCourseApplicationRow2.setName("テスト四太郎");
+    studentCourseApplicationRow2.setCourseId("2");
+    studentCourseApplicationRow2.setCourseName("テストコースB");
+    studentCourseApplicationRow2.setApplicationId("2");
+    studentCourseApplicationRow2.setApplicationStatus(ApplicationStatus.TEMP);
+
+    StudentCourseApplicationRow studentCourseApplicationRow3 = new StudentCourseApplicationRow();
+    studentCourseApplicationRow3.setStudentId("2");
+    studentCourseApplicationRow3.setName("テスト好き子");
+    studentCourseApplicationRow3.setCourseId("3");
+    studentCourseApplicationRow3.setCourseName("テストコースC");
+    studentCourseApplicationRow3.setApplicationId("3");
+    studentCourseApplicationRow3.setApplicationStatus(ApplicationStatus.COMPLETED);
+
+    List<StudentCourseApplicationRow> studentCourseApplicationRowList = List.of(
+        studentCourseApplicationRow1, studentCourseApplicationRow2, studentCourseApplicationRow3);
+
+    when(repository.searchStudentRows(searchCondition)).thenReturn(
+        studentCourseApplicationRowList);
+
+    List<StudentDetail> actual = sut.searchStudentListByCondition(searchCondition);
+
+    assertThat(actual.size()).isEqualTo(2);
+
+    StudentDetail student1 = actual.stream()
+        .filter(s -> s.getStudent().getId().equals("1"))
+        .findFirst()
+        .orElseThrow();
+
+    assertThat(student1.getCourseDetailList()).hasSize(2);
+
+    StudentDetail student2 = actual.stream()
+        .filter(s -> s.getStudent().getId().equals("2"))
+        .findFirst()
+        .orElseThrow();
+
+    assertThat(student2.getCourseDetailList()).hasSize(1);
+  }
+
+  @Test
+  void 受講生の条件検索_検索条件が全て空の時に例外が発生すること(){
+    SearchCondition searchCondition = new SearchCondition();
+
+    assertThatThrownBy(()->sut.searchStudentListByCondition(searchCondition))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 受講生の条件検索_検索条件がnullの時に例外が発生すること(){
+    assertThatThrownBy(()->sut.searchStudentListByCondition(null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void 受講生の条件検索_検索タイプが設定されていない時にデフォルトでAND検索に設定されること(){
+    StudentSearchCondition searchCondition = new StudentSearchCondition();
+    searchCondition.setAgeFrom(0);
+    SearchCondition condition = new SearchCondition();
+    condition.setStudentSearchCondition(searchCondition);
+
+    sut.searchStudentListByCondition(condition);
+
+    assertThat(condition.getSearchType()).isEqualTo(SearchType.AND);
+  }
+
+  @Test
+  void 受講生の条件検索_検索条件がリポジトリに渡されること(){
+    StudentSearchCondition studentSearchCondition = new StudentSearchCondition();
+    studentSearchCondition.setAgeFrom(0);
+    SearchCondition searchCondition = new SearchCondition();
+    searchCondition.setStudentSearchCondition(studentSearchCondition);
+    searchCondition.setSortKey(SortKey.NAME);
+    searchCondition.setSortOrder(SortOrder.DESC);
+    searchCondition.setSearchType(SearchType.OR);
+
+    sut.searchStudentListByCondition(searchCondition);
+
+    verify(repository,times(1))
+        .searchStudentRows(argThat(condition ->
+            condition.getStudentSearchCondition().getAgeFrom() == 0
+                && condition.getSortKey() == SortKey.NAME
+                && condition.getSortOrder() == SortOrder.DESC
+                && condition.getSearchType() == SearchType.OR
+        ));
+  }
+
+  @Test
   void 受講生詳細の登録_リポジトリの処理が適切に呼び出せていること () {
     Student student = new Student();
     StudentCourse studentCourse = new StudentCourse();
@@ -201,7 +333,7 @@ class StudentServiceTest {
     Student student = createStudent();
     student.setId(null);
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setCourse("テストコース");
+    studentCourse.setCourseName("テストコース");
     CourseApplication courseApplication = new CourseApplication();
     CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
     List<CourseDetail> courseDetailList = List.of(courseDetail);
@@ -219,8 +351,8 @@ class StudentServiceTest {
 
     assertThat(studentCaptor.getValue().getId()).isNull();
     assertThat(studentCaptor.getValue().getName()).isEqualTo(student.getName());
-    assertThat(studentCourseCaptor.getValue().getCourse()).isEqualTo(studentCourse.getCourse());
-    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(courseApplication.getStatus());
+    assertThat(studentCourseCaptor.getValue().getCourseName()).isEqualTo(studentCourse.getCourseName());
+    assertThat(courseApplicationCaptor.getValue().getApplicationStatus()).isEqualTo(courseApplication.getApplicationStatus());
   }
 
   @Test
@@ -242,12 +374,12 @@ class StudentServiceTest {
     verify(repository,times(1)).registerCourseApplication(courseApplicationCaptor.capture());
 
     assertThat(studentCourseCaptor.getValue().getStudentId()).isEqualTo(student.getId());
-    assertThat(studentCourseCaptor.getValue().getStartDate()).isNotNull();
-    assertThat(studentCourseCaptor.getValue().getEndDate()).isNotNull();
+    assertThat(studentCourseCaptor.getValue().getCourseStartAt()).isNotNull();
+    assertThat(studentCourseCaptor.getValue().getCourseEndAt()).isNotNull();
 
     assertThat(courseApplicationCaptor.getValue().getStudentId()).isEqualTo(student.getId());
     assertThat(courseApplicationCaptor.getValue().getCourseId()).isEqualTo(studentCourse.getId());
-    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(ApplicationStatus.TEMP);
+    assertThat(courseApplicationCaptor.getValue().getApplicationStatus()).isEqualTo(ApplicationStatus.TEMP);
   }
 
   @Test
@@ -285,7 +417,7 @@ class StudentServiceTest {
     Student student = new Student();
     student.setId(id);
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setCourse("テストコース");
+    studentCourse.setCourseName("テストコース");
     CourseApplication courseApplication = new CourseApplication();
     CourseDetail courseDetail = new CourseDetail(studentCourse, courseApplication);
 
@@ -302,13 +434,13 @@ class StudentServiceTest {
     verify(repository,times(1)).registerCourseApplication(courseApplicationCaptor.capture());
 
     assertThat(studentCourseCaptor.getValue().getStudentId()).isEqualTo(id);
-    assertThat(studentCourseCaptor.getValue().getCourse()).isEqualTo(studentCourse.getCourse());
-    assertThat(studentCourseCaptor.getValue().getStartDate()).isNotNull();
-    assertThat(studentCourseCaptor.getValue().getEndDate()).isNotNull();
+    assertThat(studentCourseCaptor.getValue().getCourseName()).isEqualTo(studentCourse.getCourseName());
+    assertThat(studentCourseCaptor.getValue().getCourseStartAt()).isNotNull();
+    assertThat(studentCourseCaptor.getValue().getCourseEndAt()).isNotNull();
 
     assertThat(courseApplicationCaptor.getValue().getStudentId()).isEqualTo(student.getId());
     assertThat(courseApplicationCaptor.getValue().getCourseId()).isEqualTo(studentCourseCaptor.getValue().getId());
-    assertThat(courseApplicationCaptor.getValue().getStatus()).isEqualTo(ApplicationStatus.TEMP);
+    assertThat(courseApplicationCaptor.getValue().getApplicationStatus()).isEqualTo(ApplicationStatus.TEMP);
   }
 
   @Test
@@ -370,7 +502,7 @@ class StudentServiceTest {
     nextCourseApplication.setId(courseApplication.getId());
     nextCourseApplication.setStudentId(courseApplication.getStudentId());
     nextCourseApplication.setCourseId(courseApplication.getCourseId());
-    nextCourseApplication.setStatus(ApplicationStatus.FORMAL);
+    nextCourseApplication.setApplicationStatus(ApplicationStatus.FORMAL);
 
     CourseDetail courseDetail = new CourseDetail(studentCourse, nextCourseApplication);
 
@@ -395,15 +527,15 @@ class StudentServiceTest {
     StudentCourse nextStudentCourse = new StudentCourse();
     nextStudentCourse.setId(studentCourse.getId());
     nextStudentCourse.setStudentId(studentCourse.getStudentId());
-    nextStudentCourse.setCourse("テスト大変");
-    nextStudentCourse.setStartDate(studentCourse.getStartDate());
-    nextStudentCourse.setEndDate(studentCourse.getEndDate());
+    nextStudentCourse.setCourseName("テスト大変");
+    nextStudentCourse.setCourseStartAt(studentCourse.getCourseStartAt());
+    nextStudentCourse.setCourseEndAt(studentCourse.getCourseEndAt());
 
     CourseApplication nextCourseApplication = new CourseApplication();
     nextCourseApplication.setId(courseApplication.getId());
     nextCourseApplication.setStudentId(courseApplication.getStudentId());
     nextCourseApplication.setCourseId(courseApplication.getCourseId());
-    nextCourseApplication.setStatus(ApplicationStatus.FORMAL);
+    nextCourseApplication.setApplicationStatus(ApplicationStatus.FORMAL);
 
     CourseDetail courseDetail = new CourseDetail(nextStudentCourse, nextCourseApplication);
 
@@ -420,15 +552,15 @@ class StudentServiceTest {
 
     assertThat(studentCourseCaptor.getValue()).satisfies(course ->  {
       assertThat(course.getId()).isEqualTo(nextStudentCourse.getId());
-      assertThat(course.getCourse()).isNotEqualTo(studentCourse.getCourse());
-      assertThat(course.getCourse()).isEqualTo(nextStudentCourse.getCourse());
+      assertThat(course.getCourseName()).isNotEqualTo(studentCourse.getCourseName());
+      assertThat(course.getCourseName()).isEqualTo(nextStudentCourse.getCourseName());
     });
 
     assertThat(courseApplicationCaptor.getValue()).satisfies(application ->  {
       assertThat(application).isNotSameAs(nextStudentCourse);
       assertThat(application.getId()).isEqualTo(nextCourseApplication.getId());
-      assertThat(application.getStatus()).isNotEqualTo(courseApplication.getStatus());
-      assertThat(application.getStatus()).isEqualTo(nextCourseApplication.getStatus());
+      assertThat(application.getApplicationStatus()).isNotEqualTo(courseApplication.getApplicationStatus());
+      assertThat(application.getApplicationStatus()).isEqualTo(nextCourseApplication.getApplicationStatus());
     });
   }
 
@@ -475,7 +607,7 @@ class StudentServiceTest {
     nextCourseApplication.setId(courseApplication.getId());
     nextCourseApplication.setStudentId(courseApplication.getStudentId());
     nextCourseApplication.setCourseId(courseApplication.getCourseId());
-    nextCourseApplication.setStatus(ApplicationStatus.COMPLETED);
+    nextCourseApplication.setApplicationStatus(ApplicationStatus.COMPLETED);
 
     CourseDetail courseDetail = new CourseDetail(studentCourse, nextCourseApplication);
 
@@ -490,7 +622,7 @@ class StudentServiceTest {
     Student student = new Student();
     student.setId("1");
     student.setName("テスト四太郎");
-    student.setHurigana("てすとしたろう");
+    student.setFurigana("てすとしたろう");
     student.setNickname("テスト大好きくん");
     student.setEmail("test@example.com");
     student.setArea("テスト県");
@@ -505,9 +637,9 @@ class StudentServiceTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setStudentId(studentId);
-    studentCourse.setCourse("テストコース");
-    studentCourse.setStartDate(LocalDate.parse("2026-02-16"));
-    studentCourse.setEndDate(LocalDate.parse("2027-02-16"));
+    studentCourse.setCourseName("テストコース");
+    studentCourse.setCourseStartAt(LocalDateTime.parse("2026-02-07T16:49:29"));
+    studentCourse.setCourseEndAt(LocalDateTime.parse("2027-02-07T16:49:29"));
     return studentCourse;
   }
 
@@ -518,7 +650,7 @@ class StudentServiceTest {
     courseApplication.setId("1");
     courseApplication.setStudentId(studentId);
     courseApplication.setCourseId(studentCourseId);
-    courseApplication.setStatus(ApplicationStatus.TEMP);
+    courseApplication.setApplicationStatus(ApplicationStatus.TEMP);
     return courseApplication;
   }
 }
