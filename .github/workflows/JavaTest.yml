@@ -40,7 +40,7 @@ jobs:
         SSH_KNOWN_HOSTS: ${{secrets.AWS_SSH_KNOWN_HOSTS}}
       run: |
         mkdir -p ~/.ssh
-        echo "SSH_KNOWN_HOSTS" > ~/.ssh/konwn_hosts
+        echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         scp -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
 
