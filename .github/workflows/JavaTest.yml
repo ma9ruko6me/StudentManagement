@@ -60,3 +60,5 @@ jobs:
           
           echo "=== StudentManagement Service Status==="
           sudo systemctl status StudentManagement --no-pager
+          
+          sudo systemctl restart NotExistService
