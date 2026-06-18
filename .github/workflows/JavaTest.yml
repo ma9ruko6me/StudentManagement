@@ -57,3 +57,6 @@ jobs:
           else
             sudo systemctl start StudentManagement
           fi
+          
+          echo "=== StudentManagement Service Status==="
+          sudo systemctl status StudentManagement --no-pager
