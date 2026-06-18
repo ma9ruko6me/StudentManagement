@@ -45,7 +45,7 @@ jobs:
         scp -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
 
     - name: SSH Application Deploy
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v1.2.5
       with:
         host: ${{ env.EC2_HOST }}
         username: ${{ env.EC2_USER }}
