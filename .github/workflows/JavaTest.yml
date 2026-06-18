@@ -9,7 +9,7 @@ on:
 env:
   EC2_USER: 'ec2-user'
   EC2_HOST: ${{ secrets.AWS_EC2_HOST }}
-  SRC_PATH: 'build/libs/*.jar'
+  SRC_PATH: 'build/libs/StudentManagement-0.0.1-SNAPSHOT.jar'
   DEST_PATH: '/home/ec2-user/StudentManagement.jar'
 
 jobs:
