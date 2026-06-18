@@ -52,7 +52,6 @@ jobs:
         key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         envs: DEST_PATH
         script: |
-          sudo yum update -y
           if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)" ; then
             sudo systemctl restart StudentManagement
           else
