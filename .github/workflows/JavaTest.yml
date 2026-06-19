@@ -61,3 +61,12 @@ jobs:
           
           echo "=== StudentManagement Service Status==="
           sudo systemctl status StudentManagement --no-pager
+          
+          if ! sudo systemctl is-active --quiet StudentManagement; then
+            echo "Service startup failed"
+          
+            sudo journalctl -u 30 --no-pager
+          
+            exit 1
+          
+          fi
