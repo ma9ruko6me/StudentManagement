@@ -39,7 +39,7 @@ jobs:
         PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         SSH_KNOWN_HOSTS: ${{secrets.AWS_SSH_KNOWN_HOSTS}}
       run: |
-        trap 'rm -f private_key' EXIT
+        trap 'echo "Deleteing private_key"; rm -f private_key' EXIT
         mkdir -p ~/.ssh
         echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
