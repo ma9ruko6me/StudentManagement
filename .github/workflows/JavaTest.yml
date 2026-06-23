@@ -35,6 +35,7 @@ jobs:
       run: ./gradlew bootJar
 
     - name: SCP Copy Application to EC2
+      # 学習目的でscpによるファイル転送を実装
       env:
         PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         SSH_KNOWN_HOSTS: ${{secrets.AWS_SSH_KNOWN_HOSTS}}
@@ -46,6 +47,7 @@ jobs:
         scp -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
 
     - name: SSH Application Deploy
+      # 学習目的でssh-actionによるリモート実行を実装
       uses: appleboy/ssh-action@v1.2.5
       with:
         host: ${{ env.EC2_HOST }}
