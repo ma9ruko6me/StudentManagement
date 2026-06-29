@@ -43,11 +43,77 @@ RaiseTech Javaコースの課題として開発しました。
 | Test | H2 Database | テスト用DB |
 | Library | Lombok | ボイラープレート削減 |
 | API Docs | Swagger / OpenAPI | API仕様の可視化 |
-| Cloud | AWS | EC2上でアプリ実行 |
+| Cloud | AWS EC2 | アプリケーション実行環境 |
+| Database | AWS RDS(MySQL) | データベース環境 |
+| CI/CD | GitHub Actions | 自動ビルド・自動デプロイ |
 | Build Tool | Gradle | ビルド管理 |
 | VCS | Git / GitHub | ソースコード管理 |
 
 ## ER図
+
+```mermaid
+erDiagram
+    STUDENTS ||--o{ STUDENTS_COURSES : has
+    STUDENTS_COURSES ||--|| COURSE_APPLICATIONS : has
+
+    STUDENTS {
+        bigint id
+        varchar name
+        varchar furigana
+        varchar nickname
+        int age
+        varchar email
+        varchar area
+        varchar gender
+        varchar remark
+        boolean is_deleted
+    }
+
+    STUDENTS_COURSES {
+        bigint id
+        bigint student_id
+        varchar course_name
+        timestamp course_start_at
+        timestamp course_end_at
+    }
+
+    COURSE_APPLICATIONS {
+        bigint id
+        bigint student_id
+        bigint course_id
+        varchar application_status
+    }
+```
+
+## AWS・インフラ構成
+
+本アプリケーションはAWS上にデプロイし、CI/CD環境を構築しています。
+
+### 構成
+
+- AWS EC2 に Spring Boot アプリケーションをデプロイ
+- AWS RDS(MySQL) を利用してデータを管理
+- EC2 と RDS 間はセキュリティグループで通信を制御
+- systemd を利用してアプリケーションをサービス化
+
+### CI/CD
+
+- GitHub Actions を利用した自動デプロイを構築
+- GradleでビルドしたjarファイルをEC2へ転送
+- デプロイ後のサービス再起動を自動化
+
+### セキュリティ対策
+
+- GitHub Secrets による機密情報管理
+- known_hosts を利用したSSHホスト検証
+- SSH関連ファイルの権限管理
+- Actionバージョン固定による安定運用
+
+### 運用面での工夫
+
+- systemctl is-active によるサービス稼働確認
+- 起動失敗時は journalctl のログを出力
+- GitHub Actions 上でデプロイ結果を確認可能
 
 ## API一覧 
 
@@ -60,6 +126,12 @@ RaiseTech Javaコースの課題として開発しました。
 | POST | /addCourse/{id} | 受講コース追加 | 
 | PUT | /updateStudent | 受講生更新 | 
 | PUT | /updateCourseDetail | 受講コース更新 |
+
+## API仕様（Swagger）
+
+API仕様はSwagger UIで確認できます。
+
+http://localhost:8080/swagger-ui/index.html
 
 ## 工夫した点
 
@@ -141,6 +213,22 @@ CourseDetailの設計変更やDTOの再設計を行う必要がありました�
 
 また、サービス・コントローラ層のテストにおいても、
 依存関係を整理しながらテスト対象の単位を決める点に苦労しました。
+
+---
+
+### AWS環境構築とデプロイ
+
+AWS環境へのデプロイでは、
+EC2・RDS・GitHub Actionsを連携させる必要があり、
+各サービスの役割や接続設定の理解に苦労しました。
+
+また、レビューを通して機密情報の管理や
+SSHホスト認証の重要性を学び、
+GitHub Secretsやknown_hostsを利用した
+安全なデプロイ方法へ改善しました。
+
+さらに、サービス起動失敗時の原因特定が難しく、
+systemdやjournalctlを利用したログ確認の仕組みを整備しました。
 
 ## 今後の改善点
 
