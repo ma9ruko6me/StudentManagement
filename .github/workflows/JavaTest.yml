@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Java CD with Gradle
 
 on:
   push:
@@ -6,12 +6,16 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  EC2_USER: 'ec2-user'
+  EC2_HOST: ${{ secrets.AWS_EC2_HOST }}
+  SRC_PATH: 'build/libs/StudentManagement.jar'
+  DEST_PATH: '/home/ec2-user/StudentManagement.jar'
+
 jobs:
-  build:
+  deploy:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -22,7 +26,54 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+
+    - name: Test with Gradle Wrapper
+      run: ./gradlew test
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew test
+      run: ./gradlew bootJar
+
+    - name: SCP Copy Application to EC2
+      # 学習目的でscpによるファイル転送を実装
+      env:
+        PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+        SSH_KNOWN_HOSTS: ${{secrets.AWS_SSH_KNOWN_HOSTS}}
+      run: |
+        trap 'rm -f private_key ~/.ssh/known_hosts' EXIT
+        
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
+        echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
+        
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        
+        scp -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
+
+    - name: SSH Application Deploy
+      # 学習目的でssh-actionによるリモート実行を実装
+      uses: appleboy/ssh-action@v1.2.5
+      with:
+        host: ${{ env.EC2_HOST }}
+        username: ${{ env.EC2_USER }}
+        key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+        envs: DEST_PATH
+        script: |
+          if sudo systemctl is-active --quiet StudentManagement; then
+            sudo systemctl restart StudentManagement
+          else
+            sudo systemctl start StudentManagement
+          fi
+          
+          echo "=== StudentManagement Service Status==="
+          sudo systemctl status StudentManagement --no-pager
+          
+          if ! sudo systemctl is-active --quiet StudentManagement; then
+            echo "Service startup failed"
+          
+            sudo journalctl -u StudentManagement -n 30 --no-pager
+          
+            exit 1
+          
+          fi
