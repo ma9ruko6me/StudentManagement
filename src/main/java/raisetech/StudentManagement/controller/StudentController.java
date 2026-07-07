@@ -40,7 +40,7 @@ public class StudentController {
    * @return　受講生詳細一覧（全件）
    */
   @Operation(summary = "受講生一覧検索", description = "受講生の一覧を検索します。")
-  @GetMapping("/studentList")
+  @GetMapping("/students")
   public List<StudentDetail> getStudentList() {return service.searchStudentList();}
 
   /**
@@ -50,7 +50,7 @@ public class StudentController {
    * @return　受講生詳細
    */
   @Operation(summary = "受講生検索", description = "受講生を検索します。")
-  @GetMapping("/student/{id}")
+  @GetMapping("/students/{id}")
   public ResponseEntity<StudentDetail> getStudent(@PathVariable String id) {
     return ResponseEntity.ok(service.searchStudent(id));
   }
@@ -61,7 +61,8 @@ public class StudentController {
    * @param searchCondition 受講生・受講生コース・受講生コース申込状況を横断した検索条件
    * @return　検索条件に一致した受講生詳細一覧
    */
-  @PostMapping("/studentListByCondition")
+  @Operation(summary = "受講生条件検索", description = "条件に一致した受講生を検索します。")
+  @PostMapping("/students/search")
   public ResponseEntity<List<StudentDetail>> getStudentListByCondition(@RequestBody @Valid SearchCondition searchCondition) {
     return ResponseEntity.ok(service.searchStudentListByCondition(searchCondition));
   }
@@ -73,7 +74,7 @@ public class StudentController {
    * @return　実行結果
    */
   @Operation(summary = "受講生登録", description = "受講生を登録します。")
-  @PostMapping("/registerStudent")
+  @PostMapping("/students/register")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.status(HttpStatus.CREATED).body(responseStudentDetail);
@@ -87,7 +88,7 @@ public class StudentController {
    * @return　実行結果
    */
   @Operation(summary = "受講生コース詳細追加", description = "受講生コース詳細を追加します。")
-  @PostMapping("/addCourse/{id}")
+  @PostMapping("/students/{id}/courses/add")
   public ResponseEntity<StudentDetail> addCourseDetail(@PathVariable String id, @RequestBody @Valid CourseDetail courseDetail) {
     StudentDetail responseStudentDetail = service.addCourseDetail(id, courseDetail);
     return ResponseEntity.ok(responseStudentDetail);
@@ -100,7 +101,7 @@ public class StudentController {
    * @return　実行結果
    */
   @Operation(summary = "受講生更新", description = "受講生を更新します。")
-  @PutMapping("/updateStudent")
+  @PutMapping("/students/update")
   public ResponseEntity<String> updateStudent(@RequestBody @Valid Student student) {
     service.updateStudent(student);
     return ResponseEntity.ok("更新処理が成功しました。");
@@ -109,10 +110,11 @@ public class StudentController {
   /**
    * 受講生コース詳細の更新を行います。
    *
-   * @param courseDetail 受講生詳細
+   * @param courseDetail コース詳細
    * @return　実行結果
    */
-  @PutMapping("/updateCourseDetail")
+  @Operation(summary = "コース詳細更新", description = "コース詳細を更新します。")
+  @PutMapping("/courses/update")
   public ResponseEntity<String> updateCourseDetail(@RequestBody @Valid CourseDetail courseDetail) {
     service.updateCourseDetail(courseDetail);
     return ResponseEntity.ok("コース詳細を更新しました。");

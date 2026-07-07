@@ -53,7 +53,7 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
-    mockMvc.perform(get("/studentList"))
+    mockMvc.perform(get("/students"))
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
@@ -68,7 +68,7 @@ class StudentControllerTest {
     List<StudentDetail> studentDetailList = List.of(studentDetail);
     when(service.searchStudentList()).thenReturn(studentDetailList);
 
-    mockMvc.perform(get("/studentList"))
+    mockMvc.perform(get("/students"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].student.id").value(student.getId()));
@@ -81,7 +81,7 @@ class StudentControllerTest {
     String id = student.getId();
     when(service.searchStudent(id)).thenReturn(studentDetail);
 
-    mockMvc.perform(get("/student/{id}", id))
+    mockMvc.perform(get("/students/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.student.id").value(id))
         .andExpect(jsonPath("$.student.name").value(student.getName()));
@@ -94,13 +94,13 @@ class StudentControllerTest {
     String id = "999";
     when(service.searchStudent(id)).thenThrow(new ResourceNotFoundException("Student not found"));
 
-    mockMvc.perform(get("/student/{id}", id))
+    mockMvc.perform(get("/students/{id}", id))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void 受講生の条件検索が実行できて検索条件が渡されること() throws Exception {
-    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(post("/students/search").contentType(MediaType.APPLICATION_JSON)
             .content("""
                   {
                     "studentSearchCondition":{"keyword":"テスト"},
@@ -124,7 +124,7 @@ class StudentControllerTest {
 
   @Test
   void 受講生の条件検索で検索条件が一部未指定でも実行できること() throws Exception {
-    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(post("/students/search").contentType(MediaType.APPLICATION_JSON)
             .content("""
                   {
                     "studentSearchCondition":{"keyword":"テスト"},
@@ -148,7 +148,7 @@ class StudentControllerTest {
   void 受講生の条件検索で検索条件が設定されなかった時に400が返ってくる() throws Exception {
     doThrow(new IllegalArgumentException()).when(service).searchStudentListByCondition(any());
 
-    mockMvc.perform(post("/studentListByCondition").contentType(MediaType.APPLICATION_JSON).content(""))
+    mockMvc.perform(post("/students/search").contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isBadRequest());
   }
 
@@ -156,7 +156,7 @@ class StudentControllerTest {
   void 受講生詳細の登録が実行できること() throws Exception {
     when(service.registerStudent(any())).thenReturn(new StudentDetail());
 
-    mockMvc.perform(post("/registerStudent").contentType(MediaType.APPLICATION_JSON).content(
+    mockMvc.perform(post("/students/register").contentType(MediaType.APPLICATION_JSON).content(
             """
                     {
                         "student": {
@@ -204,7 +204,7 @@ class StudentControllerTest {
   void 受講生コース詳細の追加が実行できること() throws Exception {
     when(service.addCourseDetail(any(),any())).thenReturn(new StudentDetail());
 
-    mockMvc.perform(post("/addCourse/999")
+    mockMvc.perform(post("/students/999/courses/add")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {"studentCourse": {"courseName": "デザインコース"}}
@@ -225,7 +225,7 @@ class StudentControllerTest {
     doThrow(new ResourceNotFoundException("Student not found"))
         .when(service).addCourseDetail(eq("999"),any(CourseDetail.class));
 
-    mockMvc.perform(post("/addCourse/999").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(post("/students/999/courses/add").contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {"studentCourse": {"courseName": "デザインコース"}}
                 """))
@@ -234,7 +234,7 @@ class StudentControllerTest {
 
   @Test
   void 受講生の更新が実行できること() throws Exception {
-    mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
+    mockMvc.perform(put("/students/update").contentType(MediaType.APPLICATION_JSON).content(
             """
                     {
                          "id": "2",
@@ -259,7 +259,7 @@ class StudentControllerTest {
   void 存在しない受講生の更新で404が返ってくること() throws Exception {
     doThrow(new ResourceNotFoundException("Student not found")).when(service).updateStudent(any());
 
-    mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content("""
+    mockMvc.perform(put("/students/update").contentType(MediaType.APPLICATION_JSON).content("""
               {
                 "id": "2",
                 "name": "久保建英",
@@ -277,7 +277,7 @@ class StudentControllerTest {
 
   @Test
   void 受講生コース詳細の更新が実行できること() throws Exception {
-    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(put("/courses/update").contentType(MediaType.APPLICATION_JSON)
             .content("""
                   {"studentCourse": {
                   "id": "6",
@@ -301,7 +301,7 @@ class StudentControllerTest {
   void 存在しない受講生コースの更新で404が返ってくること() throws Exception {
     doThrow(new ResourceNotFoundException("Course not found")).when(service).updateCourseDetail(any());
 
-    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(put("/courses/update").contentType(MediaType.APPLICATION_JSON)
             .content("""
               {
                  "studentCourse": {
@@ -321,7 +321,7 @@ class StudentControllerTest {
   void 不正なステータス遷移で409が返ってくること() throws Exception {
     doThrow(new InvalidStatusTransitionException("Invalid status transition")).when(service).updateCourseDetail(any());
 
-    mockMvc.perform(put("/updateCourseDetail").contentType(MediaType.APPLICATION_JSON).content("""
+    mockMvc.perform(put("/courses/update").contentType(MediaType.APPLICATION_JSON).content("""
               {
                  "studentCourse": {
                     "id": "6",
