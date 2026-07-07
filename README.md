@@ -117,15 +117,15 @@ erDiagram
 
 ## API一覧 
 
-| Method | Path | 内容 | 
-|----------|----------|----------| 
-| GET | /studentList | 受講生一覧検索 | 
-| GET | /student/{id} | 受講生検索 | 
-| POST | /studentListByCondition | 受講生条件検索 | 
-| POST | /registerStudent | 受講生登録 | 
-| POST | /addCourse/{id} | 受講コース追加 | 
-| PUT | /updateStudent | 受講生更新 | 
-| PUT | /updateCourseDetail | 受講コース更新 |
+| Method | Path                       | 内容 | 
+|----------|----------------------------|----------| 
+| GET | /students                  | 受講生一覧検索 | 
+| GET | /students/{id}             | 受講生検索 | 
+| POST | /students/search           | 受講生条件検索 | 
+| POST | /students/register         | 受講生登録 | 
+| POST | /students/{id}/courses/add | 受講コース追加 | 
+| PUT | /students/update           | 受講生更新 | 
+| PUT | /courses/update            | 受講コース更新 |
 
 ## API仕様（Swagger）
 
