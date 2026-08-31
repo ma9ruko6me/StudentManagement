@@ -1,34 +1,19 @@
-# 受講生管理システム 
+# 受講生管理システム
 
-Spring Bootを用いた受講生管理システムです。 
+Spring Bootを用いた受講生管理システムです。
 
-受講生情報の登録・更新・検索機能を実装しています。 
+受講生情報の登録・更新・検索機能を実装しています。
 RaiseTech Javaコースの課題として開発しました。
 
-## 作成背景
+就職活動用ポートフォリオとして、[CLAUDE.md](CLAUDE.md)に定めた開発ルールに沿ってIssue駆動・PRベースで継続的に改善しています。
 
-受講生・受講コース・申込状況を管理する業務システムを想定して開発しました。
+## ドキュメント
 
-本システムの開発を通じて、Spring Bootを用いたREST API開発、MyBatisによるデータベース操作、およびJUnitを用いたテストコード作成を学ぶことを目的としています。
-
-また、単純なCRUD機能の実装だけでなく、バリデーションや例外処理、受講生・受講コース・申込状況の管理機能を実装し、実際の業務システム開発を意識して取り組みました。
-
-
-## 機能一覧
-
-### 受講生管理
-
-* 受講生一覧検索
-* 受講生検索
-* 受講生条件検索
-* 受講生登録
-* 受講生更新
-
-### 受講コース管理
-
-* 受講コース追加
-* 受講コース更新
-
+| ドキュメント | 内容 |
+|--------------|------|
+| [docs/requirements.md](docs/requirements.md) | 要件定義書。作成背景、想定利用者、機能要件、データ項目・ER図 |
+| [docs/basic-design.md](docs/basic-design.md) | 基本設計書。技術スタック、API設計、DB物理設計、ディレクトリ構成 |
+| [docs/infrastructure.md](docs/infrastructure.md) | インフラ構成書。AWS構成、デプロイの仕組み、運用手順 |
 
 ## 使用技術
 
@@ -45,91 +30,15 @@ RaiseTech Javaコースの課題として開発しました。
 | API Docs | Swagger / OpenAPI | API仕様の可視化 |
 | Cloud | AWS EC2 | アプリケーション実行環境 |
 | Database | AWS RDS(MySQL) | データベース環境 |
-| CI/CD | GitHub Actions | 自動ビルド・自動デプロイ |
+| CI/CD | GitHub Actions | 自動ビルド・自動デプロイ(現在は無効化中。[docs/infrastructure.md](docs/infrastructure.md)を参照) |
 | Build Tool | Gradle | ビルド管理 |
 | VCS | Git / GitHub | ソースコード管理 |
 
-## ER図
+技術選定の理由は[docs/basic-design.md](docs/basic-design.md)を参照してください。
 
-```mermaid
-erDiagram
-    STUDENTS ||--o{ STUDENTS_COURSES : has
-    STUDENTS_COURSES ||--|| COURSE_APPLICATIONS : has
+## API仕様
 
-    STUDENTS {
-        bigint id
-        varchar name
-        varchar furigana
-        varchar nickname
-        int age
-        varchar email
-        varchar area
-        varchar gender
-        varchar remark
-        boolean is_deleted
-    }
-
-    STUDENTS_COURSES {
-        bigint id
-        bigint student_id
-        varchar course_name
-        timestamp course_start_at
-        timestamp course_end_at
-    }
-
-    COURSE_APPLICATIONS {
-        bigint id
-        bigint student_id
-        bigint course_id
-        varchar application_status
-    }
-```
-
-## AWS・インフラ構成
-
-本アプリケーションはAWS上にデプロイし、CI/CD環境を構築しています。
-
-### 構成
-
-- AWS EC2 に Spring Boot アプリケーションをデプロイ
-- AWS RDS(MySQL) を利用してデータを管理
-- EC2 と RDS 間はセキュリティグループで通信を制御
-- systemd を利用してアプリケーションをサービス化
-
-### CI/CD
-
-- GitHub Actions を利用した自動デプロイを構築
-- GradleでビルドしたjarファイルをEC2へ転送
-- デプロイ後のサービス再起動を自動化
-
-### セキュリティ対策
-
-- GitHub Secrets による機密情報管理
-- known_hosts を利用したSSHホスト検証
-- SSH関連ファイルの権限管理
-- Actionバージョン固定による安定運用
-
-### 運用面での工夫
-
-- systemctl is-active によるサービス稼働確認
-- 起動失敗時は journalctl のログを出力
-- GitHub Actions 上でデプロイ結果を確認可能
-
-## API一覧 
-
-| Method | Path                       | 内容 | 
-|----------|----------------------------|----------| 
-| GET | /students                  | 受講生一覧検索 | 
-| GET | /students/{id}             | 受講生検索 | 
-| POST | /students/search           | 受講生条件検索 | 
-| POST | /students/register         | 受講生登録 | 
-| POST | /students/{id}/courses/add | 受講コース追加 | 
-| PUT | /students/update           | 受講生更新 | 
-| PUT | /courses/update            | 受講コース更新 |
-
-## API仕様（Swagger）
-
-API仕様はSwagger UIで確認できます。
+エンドポイント一覧は[docs/basic-design.md](docs/basic-design.md#2-api設計)を参照してください。API仕様はSwagger UIでも確認できます。
 
 http://localhost:8080/swagger-ui/index.html
 
@@ -232,31 +141,8 @@ systemdやjournalctlを利用したログ確認の仕組みを整備しました
 
 ## 今後の改善点
 
-### API設計・実装の改善
-現状は機能ごとにAPIを追加しているため、
-パス設計や命名に一貫性がない部分があります。
+各ドキュメントの「今後の課題」セクションにまとめています。
 
-RESTの設計原則を意識しながら、
-より直感的で統一感のあるAPI設計に改善したいと考えています。
-
-また、既存コードの構造についてもリファクタリングを行い、
-可読性や保守性を向上させたいと考えています。
-
----
-
-### テストの拡充（結合テスト）
-単体テストは実装していますが、
-複数コンポーネントを組み合わせた結合テストは未実装です。
-
-システム全体としての動作保証のため、
-結合テストの設計・実装に取り組みたいと考えています。
-
----
-
-### データ構造の改善
-
-一部のテーブル設計については改善の余地があると考えています。
-
-具体的には、申込状況テーブルへの作成日時・更新日時の追加や、
-受講生テーブルにおける年齢管理を生年月日ベースへ変更するなど、
-より一貫性のあるデータ設計に改善したいと考えています。
+- [docs/requirements.md 今後の課題](docs/requirements.md#6-今後の課題)
+- [docs/basic-design.md 今後の課題](docs/basic-design.md#5-今後の課題)
+- [docs/infrastructure.md 今後の課題](docs/infrastructure.md#7-今後の課題)
