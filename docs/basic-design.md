@@ -20,39 +20,80 @@
 
 ### 1.1 バックエンド
 
-> 問いかけ: Java/Spring Boot/MyBatisはなぜ選んだか？ 他の選択肢(JPA等)と何を比較したか？
-
-(ここに記述)
+| 項目 | 選定 | 理由 |
+|------|------|------|
+| 言語 | Java 21 | LTS版を使用 |
+| フレームワーク | Spring Boot 3.3.5 | DI・自動設定によりREST APIを最小構成で構築できる |
+| ORM | MyBatis | 複数テーブルを横断するJOINを含む検索条件を、SQLを直接書いて柔軟に組み立てるため選定(JPAのような自動生成に頼らず、SQL設計そのものを学習する狙い) |
+| バリデーション | spring-boot-starter-validation | リクエストの入力チェックを宣言的に実装 |
+| API仕様書 | springdoc-openapi(Swagger UI) | エンドポイントの仕様をブラウザから確認できるようにする |
+| ボイラープレート削減 | Lombok | Getter/Setter等の定型コードを削減 |
+| ユーティリティ | Apache Commons Lang3 | 文字列操作等の補助 |
 
 ### 1.2 フロントエンド
 
-> 問いかけ: フロントエンド着手時、何を使うか？ なぜそれを選んだか？
-
-(フロントエンド着手時に記述)
+未定(未実装)。着手時にこの節へ追記する。
 
 ### 1.3 データベース・インフラ
 
-> 問いかけ: なぜMySQLを選んだか？ ローカル開発環境・本番環境をどう分けているか？
-
-(ここに記述)
+| 項目 | 選定 | 理由 |
+|------|------|------|
+| データベース(本番) | MySQL(AWS RDS) | 指定 |
+| データベース(テスト) | H2(インメモリ) | テスト実行のたびにクリーンな状態で高速に検証するため |
+| 本番インフラ | AWS EC2 + RDS | [docs/infrastructure.md](infrastructure.md)を参照 |
 
 ## 2. API設計
 
-> 問いかけ: 各エンドポイントは何を受け取り、何を返すか？ 現状の設計(パス・命名)で気になっている点はあるか？
+ベースURL: (本番/ローカル環境に応じて変わる。ローカルは`http://localhost:8080`)
 
-(READMEのAPI一覧を移植し、リクエスト/レスポンス例を追記する)
+| メソッド | パス | 概要 |
+|---------|------|------|
+| GET | `/students` | 受講生一覧検索(全件、条件指定なし) |
+| GET | `/students/{id}` | 受講生検索(IDに紐づく受講生詳細を取得) |
+| POST | `/students/search` | 受講生条件検索(受講生・受講コース・申込状況を横断した条件で検索) |
+| POST | `/students/register` | 受講生登録(受講コース・申込状況の初期登録を含む) |
+| POST | `/students/{id}/courses/add` | 受講コース詳細追加 |
+| PUT | `/students/update` | 受講生更新(論理削除によるキャンセルフラグ更新を含む) |
+| PUT | `/courses/update` | 受講コース詳細更新(申込状況の状態遷移チェックを含む) |
+| GET | `/testException` | (開発用)例外ハンドリングの動作確認用エンドポイント |
+
+すべてのレスポンスは`StudentDetail`(受講生+受講コース詳細のリストをまとめたドメインオブジェクト)、または`CourseDetail`(受講コース情報+申込状況をまとめたドメインオブジェクト)を基本とする。
+
+### エラーレスポンス
+
+| 例外 | HTTPステータス |
+|------|-----------------|
+| `ResourceNotFoundException` | 404 Not Found |
+| `InvalidStatusTransitionException` | 409 Conflict |
+| `IllegalArgumentException`(バリデーションエラー等) | 400 Bad Request |
+| `TestException`(動作確認用) | 400 Bad Request |
 
 ## 3. DB物理設計
 
-> 問いかけ: 各テーブルのカラム・型・制約はどうなっているか？ なぜその型を選んだか？(例: IDをStringにしている理由)
+要件定義書の[ER図](requirements.md#4-データ項目er図)を参照。
 
-(ここに記述。ER図は要件定義書と対応させる)
+| テーブル | 主なカラム | 備考 |
+|----------|------------|------|
+| students | id(bigint, 自動採番), name, furigana, nickname, age, email, area, gender, remark, is_deleted | APIレイヤーでは`id`を`String`として扱っている(DBの`bigint`と型が一致していない点は[今後の課題](#5-今後の課題)を参照) |
+| students_courses | id, student_id, course_name, course_start_at, course_end_at | 登録時、開始日=現在時刻、終了日=開始日+1年をアプリケーション側で自動設定 |
+| course_applications | id, student_id, course_id, application_status | `application_status`は`ApplicationStatus` enumの値(TEMP/FORMAL/IN_PROGRESS/COMPLETED/CANCEL) |
 
 ## 4. ディレクトリ構成
 
-> 問いかけ: 各パッケージ(controller/service/repository/domain/dto等)の役割は何か？
-
-(ここに記述)
+```
+src/main/java/raisetech/StudentManagement/
+├── controller/            # REST APIのエンドポイント
+│   └── converter/          # Entity(Student等)とDTO/ドメインオブジェクトの相互変換
+├── data/                   # DBテーブルに対応するEntity(Student, StudentCourse, CourseApplication)
+├── domain/                 # 複数Entityを組み合わせたドメインオブジェクト(StudentDetail, CourseDetail)
+├── dto/
+│   ├── request/             # リクエスト用DTO(検索条件など)
+│   └── result/              # フラットな検索結果を受け取るDTO
+├── enums/                  # 状態・区分を表すenum(ApplicationStatus, SearchType等)
+├── exception/              # 業務例外・システム例外とグローバル例外ハンドラ
+├── repository/             # MyBatisのMapperインターフェース
+└── service/                # ビジネスロジック(検索・登録・更新・状態遷移チェック)
+```
 
 ## 5. 今後の課題
 
