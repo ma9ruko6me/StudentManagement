@@ -36,6 +36,17 @@ RaiseTech Javaコースの課題として開発しました。
 
 技術選定の理由は[docs/basic-design.md](docs/basic-design.md)を参照してください。
 
+## ローカル環境構築
+
+1. MySQLをローカルに用意し、`StudentManagement`という名前のデータベースを作成する
+2. DB接続情報を環境変数として設定する(`DB_USERNAME`・`DB_PASSWORD`。値は各自のMySQL設定に合わせる)
+   - IntelliJ IDEAの場合: 実行構成(Run Configuration)の「環境変数」欄に設定する
+   - コマンドラインの場合: `export DB_USERNAME=root DB_PASSWORD=<自分のパスワード>`
+   - 設定する項目は[.env.example](.env.example)を参照(このファイル自体は値を埋めても`.env`にリネームしない限りコミットされない)
+3. `./gradlew bootRun`でアプリケーションを起動する
+
+DB接続情報の秘密情報としての扱い方は[docs/infrastructure.md](docs/infrastructure.md#6-秘密情報の取り扱い)を参照してください。
+
 ## API仕様
 
 エンドポイント一覧は[docs/basic-design.md](docs/basic-design.md#2-api設計)を参照してください。API仕様はSwagger UIでも確認できます。
