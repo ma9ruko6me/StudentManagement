@@ -9,3 +9,11 @@ build/
 # macOS
 .DS_Store
 
+# ローカル限定ルール(GitHubに上げない)
+CLAUDE.local.md
+docs/interview-practice.local.md
+
+# 環境変数(秘密情報を含むため)
+.env
+.env.local
+

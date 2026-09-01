@@ -5,6 +5,7 @@
 | 日付 | 内容 |
 |------|------|
 | 2026-08-31 | 初版作成(READMEからの分離) |
+| 2026-09-01 | DB接続情報を環境変数化(Issue #16)。秘密情報の取り扱いを実態に合わせて更新 |
 
 ---
 
@@ -67,7 +68,20 @@ EC2/RDSの起動・停止は現状手動(要確認: 具体的な手順があれ�
 
 ## 6. 秘密情報の取り扱い
 
-AWSの接続情報(EC2ホスト、SSH秘密鍵)はGitHub Secretsで管理し、リポジトリには含めていない。RDSの接続情報は`application.properties`で環境変数参照する構成(要確認: 実際の環境変数名・設定方法)。
+AWSの接続情報(EC2ホスト、SSH秘密鍵)はGitHub Secretsで管理し、リポジトリには含めていない。
+
+DB接続情報(ユーザー名・パスワード・URL)は、`application.properties`で以下のように環境変数参照する構成にしている(Issue #16)。
+
+```properties
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/StudentManagement}
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD}
+```
+
+- `DB_URL`・`DB_USERNAME`はデフォルト値をローカル用に設定してあるため、ローカルでは`DB_PASSWORD`のみ設定すればよい
+- `DB_PASSWORD`にはデフォルト値を持たせていない。未設定の場合はアプリケーションが起動時に失敗する(秘密情報のフォールバック値を持たないようにするため)
+- ローカルでの設定方法は[README.md](../README.md#ローカル環境構築)を参照
+- AWS本番環境でこれらの環境変数を具体的にどう注入するか(EC2の環境変数、SSM Parameter Store等)は、実際にデプロイする際に別途検討する([今後の課題](#7-今後の課題)を参照)
 
 ## 7. 今後の課題
 
@@ -76,6 +90,8 @@ AWSの接続情報(EC2ホスト、SSH秘密鍵)はGitHub Secretsで管理し、�
 - [ ] Terraformでのインフラコード化(EC2/RDS/SG/キーペアの管理)
 - [ ] CI/CDの再実装(テスト必須化を含む)
 - [ ] 古い`feature/*`ブランチの整理
+- [ ] AWS本番環境での環境変数(`DB_URL`/`DB_USERNAME`/`DB_PASSWORD`)の注入方法の検討・実装
+- [ ] AWS Secrets Manager等による動的なシークレット管理・自動ローテーションの検討
 
 ## 8. トラブルシューティング記録
 
@@ -84,3 +100,4 @@ AWSの接続情報(EC2ホスト、SSH秘密鍵)はGitHub Secretsで管理し、�
 | 事象 | 原因 | 対処 |
 |------|------|------|
 | PRを作成・更新しただけで本番EC2へのデプロイが実行されていた | JavaTest.ymlのトリガーが`push`と`pull_request`の両方になっており、マージ前のコードでもデプロイジョブが走る構成だった | ワークフローを無効化(`gh workflow disable`)。ファイルの内容は変更せず学習の記録として残す。あわせてmainブランチにPR経由でのマージを必須化する保護ルールを追加した(Issue #13) |
+| `application.properties`にDB接続情報(パスワードを含む)を直書きしていた | 初期構築時に、動作させることを優先して値を直接記載したまま、それ以降も見直していなかった | 環境変数から読み込む方式に変更(Issue #16)。あわせてローカルDBのパスワードをローテーションした |
