@@ -1,0 +1,58 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
+  background: #f4f5f7;
+  color: #172b4d;
+}
+
+.app-header {
+  padding: 12px 20px;
+  background: #026aa7;
+  color: #fff;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.screen {
+  padding: 20px;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
+  font-size: 14px;
+}
+
+.student-table th,
+.student-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #dfe1e6;
+  white-space: nowrap;
+}
+
+.student-table thead th {
+  background: #ebecf0;
+  font-weight: bold;
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.student-table tbody tr:hover {
+  background: #f4f5f7;
+}
+
+.student-table tbody tr:last-child td {
+  border-bottom: none;
+}
