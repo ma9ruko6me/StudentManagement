@@ -73,6 +73,6 @@ Cursor Cloud Agentsのような複数AIモデルによるレビューループ�
 
 # 関連ドキュメント
 
-- 要件定義: docs/requirements.md (作成予定)
-- 基本設計: docs/basic-design.md (作成予定)
-- インフラ構成: docs/infrastructure.md (作成予定)
+- 要件定義: docs/requirements.md
+- 基本設計: docs/basic-design.md
+- インフラ構成: docs/infrastructure.md
