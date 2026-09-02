@@ -9,9 +9,16 @@ build/
 # macOS
 .DS_Store
 
+# フロントエンド(Node.js/Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
 # ローカル限定ルール(GitHubに上げない)
 CLAUDE.local.md
 docs/interview-practice.local.md
+.claude/settings.local.json
 
 # 環境変数(秘密情報を含むため)
 .env
