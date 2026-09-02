@@ -32,7 +32,18 @@
 
 ### 1.2 フロントエンド
 
-未定(未実装)。着手時にこの節へ追記する。
+| 項目 | 選定 | 理由 |
+|------|------|------|
+| ライブラリ | React 19 | 姉妹プロジェクトTaskManagementと構成を揃え、複数ポートフォリオで再現性のある開発プロセスを示すため |
+| ビルドツール | Vite 8 | TaskManagementと同一。高速な開発サーバーとビルドを利用できる |
+| 言語 | TypeScript | 型安全性を確保し、バックエンドDTO(`StudentDetail`等)との対応関係を明示するため |
+| データ取得 | TanStack Query(React Query) | サーバー状態(ローディング・エラー・キャッシュ)の管理を手動の`useState`+`useEffect`に代えて宣言的に扱うため |
+| HTTPクライアント | axios | TaskManagementと同一 |
+| スタイリング | Tailwind CSS v4(`@tailwindcss/vite`) | TaskManagementと同一。ユーティリティクラスで一貫した見た目を素早く構築するため |
+| Lint/フォーマット | ESLint(flat config) + Prettier | TaskManagementと同一設定を踏襲 |
+| テスト | Vitest + Testing Library | TaskManagementには無い要素として、今回新たに導入。手動確認だけに頼らず、今後の機能追加時のデグレを機械的に検知できるようにするため |
+
+CORS設定はバックエンド側(`raisetech.StudentManagement.config.WebConfig`)で`http://localhost:5173`からのGETリクエストのみ許可している。
 
 ### 1.3 データベース・インフラ
 
@@ -82,6 +93,7 @@
 
 ```
 backend/src/main/java/raisetech/StudentManagement/
+├── config/                 # Spring設定(CORS設定等)
 ├── controller/            # REST APIのエンドポイント
 │   └── converter/          # Entity(Student等)とDTO/ドメインオブジェクトの相互変換
 ├── data/                   # DBテーブルに対応するEntity(Student, StudentCourse, CourseApplication)
@@ -104,4 +116,4 @@ backend/src/main/java/raisetech/StudentManagement/
 - [ ] 結合テストを追加する
 - [ ] Testcontainers導入(H2から本物のMySQLでの統合テストへ)を検討する
 - [ ] Flywayでのスキーマバージョン管理導入を検討する
-- [ ] 自作コードとAI利用コードの区別方針(フロントエンドはディレクトリ分離、バックエンドはコミット/PR単位)をフロントエンド着手時に適用する
+- [x] 自作コードとAI利用コードの区別方針(フロントエンドはディレクトリ分離、バックエンドはコミット/PR単位)をフロントエンド着手時に適用する → `frontend/`ディレクトリを新設することで対応(2026-09-02)
