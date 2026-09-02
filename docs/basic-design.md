@@ -81,7 +81,7 @@
 ## 4. ディレクトリ構成
 
 ```
-src/main/java/raisetech/StudentManagement/
+backend/src/main/java/raisetech/StudentManagement/
 ├── controller/            # REST APIのエンドポイント
 │   └── converter/          # Entity(Student等)とDTO/ドメインオブジェクトの相互変換
 ├── data/                   # DBテーブルに対応するEntity(Student, StudentCourse, CourseApplication)

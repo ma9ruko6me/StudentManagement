@@ -59,6 +59,7 @@ dependencies {
 	//H2(InMemoryDB)
 	testImplementation 'com.h2database:h2:2.2.224'
 
+	//JUnit5テストの起動用(Spring Boot 3系ではspring-boot-starter-testに自動では含まれない)
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
