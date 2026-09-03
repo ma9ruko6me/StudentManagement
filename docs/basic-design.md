@@ -111,9 +111,12 @@ backend/src/main/java/raisetech/StudentManagement/
 
 未着手のまま残っている項目を記録する(着手・解決したら取り消し線または削除する)。
 
-- [ ] `/testException`エンドポイントの扱いを検討する(本番公開のままでよいか)
+- [x] `/testException`エンドポイントの扱いを検討する(本番公開のままでよいか) → 削除する方針に決定(2026-09-03)
 - [ ] IDが`String`型・DBが`bigint`という型の整合性を確認する
 - [ ] 結合テストを追加する
 - [ ] Testcontainers導入(H2から本物のMySQLでの統合テストへ)を検討する
 - [ ] Flywayでのスキーマバージョン管理導入を検討する
+- [ ] `StudentService.registerStudent`で`studentDetail.getCourseDetailList()`がnullの場合にNPEになる不具合を修正する(2026-09-03のコードレビューで発見)
+- [ ] 汎用的な`IllegalArgumentException`に寄せているエラー表示を見直す。`ResourceNotFoundException`/`InvalidStatusTransitionException`のように意味ごとに専用の例外クラスへ分離するか検討する(2026-09-03のコードレビューで発見)
+- [ ] クラス名・パッケージ命名(`dto/request`と`dto/result`のように対になる語彙が揃っていない等)を実務寄りの命名に統一する(2026-09-03のコードレビューで発見)
 - [x] 自作コードとAI利用コードの区別方針(フロントエンドはディレクトリ分離、バックエンドはコミット/PR単位)をフロントエンド着手時に適用する → `frontend/`ディレクトリを新設することで対応(2026-09-02)
