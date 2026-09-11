@@ -24,11 +24,44 @@ body {
   padding: 20px;
 }
 
-h2, h3 {
-  color: #172b4d;
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
+  font-size: 14px;
 }
 
-/* ==== ボタン ==== */
+.student-table th,
+.student-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #dfe1e6;
+  white-space: nowrap;
+}
+
+.student-table thead th {
+  background: #ebecf0;
+  font-weight: bold;
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.student-table tbody tr:hover {
+  background: #f4f5f7;
+}
+
+.student-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==== 新規登録 ==== */
+.toolbar {
+  margin-bottom: 16px;
+}
+
 .btn {
   border: none;
   border-radius: 4px;
@@ -42,16 +75,6 @@ h2, h3 {
   color: #fff;
 }
 
-.btn-secondary {
-  background: #dfe1e6;
-  color: #172b4d;
-}
-
-.btn-danger {
-  background: #de350b;
-  color: #fff;
-}
-
 .btn-link {
   background: none;
   color: #026aa7;
@@ -59,106 +82,40 @@ h2, h3 {
   text-decoration: underline;
 }
 
-.back-link {
-  margin-bottom: 12px;
-  display: inline-block;
-}
-
-/* ==== 一覧画面上部：検索条件・新規登録・論理削除済み一覧を1列に並べる ==== */
-.toolbar-row {
+/* ==== モーダル ==== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 30, 66, 0.54);
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-  margin-bottom: 16px;
-}
-
-.toolbar-row label {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  color: #5e6c84;
-  gap: 4px;
-}
-
-.toolbar-row input,
-.toolbar-row select {
-  font-size: 14px;
-  padding: 6px 8px;
-  border: 1px solid #dfe1e6;
-  border-radius: 4px;
-}
-
-.toolbar-row .age-range {
-  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  padding: 20px;
 }
 
-.toolbar-row .age-range input {
-  width: 70px;
-}
-
-.toolbar-spacer {
-  flex: 1;
-}
-
-/* ==== テーブル共通 ==== */
-.student-table,
-.course-table {
-  width: 100%;
-  border-collapse: collapse;
+.modal {
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
-  font-size: 14px;
+  padding: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.student-table th,
-.student-table td,
-.course-table th,
-.course-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid #dfe1e6;
-  white-space: nowrap;
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.student-table thead th,
-.course-table thead th {
-  background: #ebecf0;
-  font-weight: bold;
-  color: #5e6c84;
-  font-size: 12px;
+.modal-header h2 {
+  margin: 0;
 }
 
-.student-table tbody tr:last-child td,
-.course-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.clickable-row:hover {
-  background: #f4f5f7;
-}
-
-.empty-message {
-  color: #5e6c84;
-  font-size: 13px;
-  padding: 10px 4px;
-}
-
-/* ==== 詳細・編集/新規登録フォーム ==== */
 .detail-form {
   background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
 }
 
 .form-grid {
@@ -176,8 +133,7 @@ h2, h3 {
 }
 
 .form-grid input,
-.form-grid select,
-.form-grid textarea {
+.form-grid select {
   font-size: 14px;
   padding: 6px 8px;
   border: 1px solid #dfe1e6;
@@ -185,38 +141,12 @@ h2, h3 {
   font-family: inherit;
 }
 
-.form-grid input:disabled,
-.form-grid select:disabled,
-.form-grid textarea:disabled {
-  background: #f4f5f7;
-  color: #172b4d;
-}
-
-.remark-field {
-  grid-column: 1 / -1;
-}
-
-.remark-field textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
 .actions {
   margin-top: 16px;
-  display: flex;
-  gap: 8px;
 }
 
 .form-error {
   color: #de350b;
   font-size: 13px;
   margin-top: 10px;
-}
-
-#courseForm {
-  background: #fff;
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-top: 8px;
-  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25);
 }
