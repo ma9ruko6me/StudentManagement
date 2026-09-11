@@ -139,9 +139,12 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <p className="text-xs text-text-muted">
+            <span className="text-danger">＊</span> は必須項目です
+          </p>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              名前
+              <span>名前<span className="text-danger">＊</span></span>
               <input
                 type="text"
                 value={form.name}
@@ -151,7 +154,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              ふりがな
+              <span>ふりがな<span className="text-danger">＊</span></span>
               <input
                 type="text"
                 value={form.furigana}
@@ -161,7 +164,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              ニックネーム
+              <span>ニックネーム<span className="text-danger">＊</span></span>
               <input
                 type="text"
                 value={form.nickname}
@@ -171,7 +174,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              メール
+              <span>メール<span className="text-danger">＊</span></span>
               <input
                 type="email"
                 value={form.email}
@@ -181,7 +184,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              地域
+              <span>地域<span className="text-danger">＊</span></span>
               <input
                 type="text"
                 value={form.area}
@@ -191,7 +194,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              年齢
+              <span>年齢<span className="text-danger">＊</span></span>
               <input
                 type="number"
                 min={0}
@@ -202,7 +205,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-muted">
-              性別
+              <span>性別<span className="text-danger">＊</span></span>
               <select
                 value={form.gender}
                 onChange={(e) => handleChange('gender', e.target.value)}

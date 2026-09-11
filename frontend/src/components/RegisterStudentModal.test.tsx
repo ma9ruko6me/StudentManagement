@@ -20,13 +20,13 @@ function setup() {
 }
 
 function fillRequiredFields() {
-  fireEvent.change(screen.getByLabelText('名前'), { target: { value: '山田太郎' } })
-  fireEvent.change(screen.getByLabelText('ふりがな'), { target: { value: 'ヤマダタロウ' } })
-  fireEvent.change(screen.getByLabelText('ニックネーム'), { target: { value: 'たろ' } })
-  fireEvent.change(screen.getByLabelText('メール'), { target: { value: 'taro@example.com' } })
-  fireEvent.change(screen.getByLabelText('地域'), { target: { value: '東京都' } })
-  fireEvent.change(screen.getByLabelText('年齢'), { target: { value: '20' } })
-  fireEvent.change(screen.getByLabelText('性別'), { target: { value: '男性' } })
+  fireEvent.change(screen.getByLabelText(/^名前/), { target: { value: '山田太郎' } })
+  fireEvent.change(screen.getByLabelText(/^ふりがな/), { target: { value: 'ヤマダタロウ' } })
+  fireEvent.change(screen.getByLabelText(/^ニックネーム/), { target: { value: 'たろ' } })
+  fireEvent.change(screen.getByLabelText(/^メール/), { target: { value: 'taro@example.com' } })
+  fireEvent.change(screen.getByLabelText(/^地域/), { target: { value: '東京都' } })
+  fireEvent.change(screen.getByLabelText(/^年齢/), { target: { value: '20' } })
+  fireEvent.change(screen.getByLabelText(/^性別/), { target: { value: '男性' } })
 }
 
 describe('RegisterStudentModal', () => {
@@ -50,7 +50,7 @@ describe('RegisterStudentModal', () => {
     render(<RegisterStudentModal isOpen onClose={vi.fn()} />)
 
     fillRequiredFields()
-    fireEvent.change(screen.getByLabelText('メール'), { target: { value: 'invalid-email' } })
+    fireEvent.change(screen.getByLabelText(/^メール/), { target: { value: 'invalid-email' } })
     fireEvent.click(screen.getByRole('button', { name: '登録する' }))
 
     expect(screen.getByText('メールアドレスの形式が正しくありません。')).toBeInTheDocument()
