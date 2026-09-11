@@ -12,7 +12,12 @@
   <h1>受講生一覧（プロトタイプ）</h1>
 </header>
 
-<section class="screen">
+<!-- ==== 一覧画面 ==== -->
+<section id="listScreen" class="screen">
+  <div class="toolbar">
+    <button type="button" id="openRegisterBtn" class="btn btn-primary">＋ 新規登録</button>
+  </div>
+
   <table class="student-table">
     <thead>
       <tr>
@@ -28,6 +33,38 @@
     <tbody id="studentTableBody"></tbody>
   </table>
 </section>
+
+<!-- ==== 新規登録モーダル ==== -->
+<div id="registerModal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle">
+    <div class="modal-header">
+      <h2 id="registerModalTitle">受講生 新規登録</h2>
+      <button type="button" id="closeRegisterBtn" class="btn btn-link">✕</button>
+    </div>
+
+    <form id="registerForm" class="detail-form">
+      <div class="form-grid">
+        <label>名前<input type="text" name="name" required></label>
+        <label>ふりがな<input type="text" name="furigana" required></label>
+        <label>ニックネーム<input type="text" name="nickname" required></label>
+        <label>メール<input type="email" name="email" required></label>
+        <label>地域<input type="text" name="area" required></label>
+        <label>年齢<input type="number" name="age" min="0" required></label>
+        <label>性別
+          <select name="gender" required>
+            <option value="">選択してください</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+          </select>
+        </label>
+      </div>
+      <p class="form-error" id="registerFormError" hidden></p>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">登録する</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>
