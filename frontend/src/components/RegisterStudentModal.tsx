@@ -215,6 +215,7 @@ export function RegisterStudentModal({ isOpen, onClose }: RegisterStudentModalPr
                 <option value="">選択してください</option>
                 <option value="男性">男性</option>
                 <option value="女性">女性</option>
+                <option value="その他">その他</option>
               </select>
             </label>
             <label className="col-span-2 flex flex-col gap-1 text-xs text-text-muted">
