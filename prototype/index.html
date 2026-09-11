@@ -12,7 +12,39 @@
   <h1>受講生一覧（プロトタイプ）</h1>
 </header>
 
-<section class="screen">
+<!-- ==== 一覧画面 ==== -->
+<section id="listScreen" class="screen">
+  <form id="searchForm" class="toolbar-row">
+    <label>
+      名前・ふりがな
+      <input type="text" id="searchKeyword" placeholder="部分一致で検索">
+    </label>
+    <label>
+      地域
+      <select id="searchArea">
+        <option value="">すべて</option>
+      </select>
+    </label>
+    <label>
+      性別
+      <select id="searchGender">
+        <option value="">すべて</option>
+        <option value="男性">男性</option>
+        <option value="女性">女性</option>
+      </select>
+    </label>
+    <label class="age-range">
+      年齢
+      <input type="number" id="searchAgeFrom" min="0" placeholder="下限">
+      〜
+      <input type="number" id="searchAgeTo" min="0" placeholder="上限">
+    </label>
+    <button type="button" id="resetSearchBtn" class="btn btn-secondary">条件クリア</button>
+    <span class="toolbar-spacer"></span>
+    <button type="button" id="openRegisterBtn" class="btn btn-primary">＋ 新規登録</button>
+    <button type="button" id="openDeletedBtn" class="btn btn-link">論理削除済み一覧を見る</button>
+  </form>
+
   <table class="student-table">
     <thead>
       <tr>
@@ -27,6 +59,110 @@
     </thead>
     <tbody id="studentTableBody"></tbody>
   </table>
+  <p id="listEmptyMessage" class="empty-message" hidden>該当する受講生が見つかりません。</p>
+</section>
+
+<!-- ==== 詳細・編集画面 ==== -->
+<section id="detailScreen" class="screen" hidden>
+  <button type="button" class="btn btn-link back-link" data-target="listScreen">← 一覧に戻る</button>
+  <h2>受講生詳細</h2>
+
+  <form id="detailForm" class="detail-form">
+    <div class="form-grid">
+      <label>名前<input type="text" name="name" disabled required></label>
+      <label>ふりがな<input type="text" name="furigana" disabled required></label>
+      <label>ニックネーム<input type="text" name="nickname" disabled required></label>
+      <label>メール<input type="email" name="email" disabled required></label>
+      <label>地域<input type="text" name="area" disabled required></label>
+      <label>年齢<input type="number" name="age" min="0" disabled required></label>
+      <label>性別
+        <select name="gender" disabled required>
+          <option value="男性">男性</option>
+          <option value="女性">女性</option>
+        </select>
+      </label>
+      <label class="remark-field">備考<textarea name="remark" disabled></textarea></label>
+    </div>
+    <p class="form-error" id="detailFormError" hidden></p>
+    <div class="actions">
+      <button type="button" id="editToggleBtn" class="btn btn-secondary">編集</button>
+      <button type="submit" id="saveDetailBtn" class="btn btn-primary" hidden>保存</button>
+      <button type="button" id="deleteStudentBtn" class="btn btn-danger">この受講生を論理削除</button>
+    </div>
+  </form>
+
+  <h3>受講コース</h3>
+  <table class="course-table">
+    <thead>
+      <tr>
+        <th>コース名</th>
+        <th>受講開始日</th>
+        <th>受講終了日</th>
+      </tr>
+    </thead>
+    <tbody id="courseTableBody"></tbody>
+  </table>
+  <p id="courseEmptyMessage" class="empty-message" hidden>受講中のコースはありません。</p>
+
+  <h3>コース追加</h3>
+  <form id="courseForm" class="toolbar-row">
+    <label>コース名<input type="text" id="newCourseName" required></label>
+    <label>開始日<input type="date" id="newCourseStart" required></label>
+    <label>終了日<input type="date" id="newCourseEnd" required></label>
+    <button type="submit" class="btn btn-primary">コースを追加</button>
+  </form>
+  <p class="form-error" id="courseFormError" hidden></p>
+</section>
+
+<!-- ==== 新規登録画面 ==== -->
+<section id="registerScreen" class="screen" hidden>
+  <button type="button" class="btn btn-link back-link" data-target="listScreen">← 一覧に戻る</button>
+  <h2>受講生 新規登録</h2>
+
+  <form id="registerForm" class="detail-form">
+    <div class="form-grid">
+      <label>名前<input type="text" name="name" required></label>
+      <label>ふりがな<input type="text" name="furigana" required></label>
+      <label>ニックネーム<input type="text" name="nickname" required></label>
+      <label>メール<input type="email" name="email" required></label>
+      <label>地域<input type="text" name="area" required></label>
+      <label>年齢<input type="number" name="age" min="0" required></label>
+      <label>性別
+        <select name="gender" required>
+          <option value="">選択してください</option>
+          <option value="男性">男性</option>
+          <option value="女性">女性</option>
+        </select>
+      </label>
+      <label class="remark-field">備考<textarea name="remark"></textarea></label>
+    </div>
+    <p class="form-error" id="registerFormError" hidden></p>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">登録する</button>
+    </div>
+  </form>
+</section>
+
+<!-- ==== 論理削除済み一覧画面 ==== -->
+<section id="deletedScreen" class="screen" hidden>
+  <button type="button" class="btn btn-link back-link" data-target="listScreen">← 一覧に戻る</button>
+  <h2>論理削除済み受講生</h2>
+
+  <table class="student-table">
+    <thead>
+      <tr>
+        <th>名前</th>
+        <th>ふりがな</th>
+        <th>ニックネーム</th>
+        <th>年齢</th>
+        <th>メール</th>
+        <th>地域</th>
+        <th>性別</th>
+      </tr>
+    </thead>
+    <tbody id="deletedTableBody"></tbody>
+  </table>
+  <p id="deletedEmptyMessage" class="empty-message" hidden>論理削除済みの受講生はいません。</p>
 </section>
 
 <script src="app.js"></script>
