@@ -66,6 +66,83 @@
   </div>
 </div>
 
+<!-- ==== 受講生詳細モーダル ==== -->
+<div id="detailModal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+    <div class="modal-header">
+      <h2 id="detailModalTitle">受講生詳細</h2>
+      <button type="button" id="closeDetailBtn" class="btn btn-link">✕</button>
+    </div>
+
+    <div class="detail-info form-grid">
+      <div><span class="detail-label">名前</span><span id="detailName"></span></div>
+      <div><span class="detail-label">ふりがな</span><span id="detailFurigana"></span></div>
+      <div><span class="detail-label">ニックネーム</span><span id="detailNickname"></span></div>
+      <div><span class="detail-label">メール</span><span id="detailEmail"></span></div>
+      <div><span class="detail-label">地域</span><span id="detailArea"></span></div>
+      <div><span class="detail-label">年齢</span><span id="detailAge"></span></div>
+      <div><span class="detail-label">性別</span><span id="detailGender"></span></div>
+      <div><span class="detail-label">備考</span><span id="detailRemark"></span></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="openEditBtn" class="btn btn-primary">編集</button>
+    </div>
+
+    <h3 class="section-title">コース一覧</h3>
+    <table class="course-table">
+      <thead>
+        <tr>
+          <th>コース名</th>
+          <th>申込状況</th>
+          <th>状況変更</th>
+        </tr>
+      </thead>
+      <tbody id="courseTableBody"></tbody>
+    </table>
+
+    <h3 class="section-title">コース追加</h3>
+    <form id="addCourseForm" class="add-course-form">
+      <input type="text" name="courseName" placeholder="コース名" required>
+      <button type="submit" class="btn btn-primary">追加</button>
+    </form>
+    <p class="form-error" id="addCourseFormError" hidden></p>
+  </div>
+</div>
+
+<!-- ==== 受講生編集モーダル ==== -->
+<div id="editModal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-header">
+      <h2 id="editModalTitle">受講生 編集</h2>
+      <button type="button" id="closeEditBtn" class="btn btn-link">✕</button>
+    </div>
+
+    <form id="editForm" class="detail-form">
+      <div class="form-grid">
+        <label>名前<input type="text" name="name" required></label>
+        <label>ふりがな<input type="text" name="furigana" required></label>
+        <label>ニックネーム<input type="text" name="nickname" required></label>
+        <label>メール<input type="email" name="email" required></label>
+        <label>地域<input type="text" name="area" required></label>
+        <label>年齢<input type="number" name="age" min="0" required></label>
+        <label>性別
+          <select name="gender" required>
+            <option value="">選択してください</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+          </select>
+        </label>
+        <label>備考<input type="text" name="remark"></label>
+      </div>
+      <p class="form-error" id="editFormError" hidden></p>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">更新する</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
