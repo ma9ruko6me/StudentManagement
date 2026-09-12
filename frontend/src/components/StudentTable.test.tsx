@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { StudentTable } from './StudentTable'
 import { useStudents } from '../hooks/useStudents'
@@ -6,12 +6,13 @@ import { useStudents } from '../hooks/useStudents'
 vi.mock('../hooks/useStudents')
 
 const mockedUseStudents = vi.mocked(useStudents)
+const noop = () => {}
 
 describe('StudentTable', () => {
   it('shows a loading message while fetching', () => {
     mockedUseStudents.mockReturnValue({ isLoading: true, isError: false, data: undefined } as never)
 
-    render(<StudentTable />)
+    render(<StudentTable onSelectStudent={noop} />)
 
     expect(screen.getByText('読み込み中...')).toBeInTheDocument()
   })
@@ -19,7 +20,7 @@ describe('StudentTable', () => {
   it('shows an error message when the request fails', () => {
     mockedUseStudents.mockReturnValue({ isLoading: false, isError: true, data: undefined } as never)
 
-    render(<StudentTable />)
+    render(<StudentTable onSelectStudent={noop} />)
 
     expect(screen.getByText('受講生の取得に失敗しました。')).toBeInTheDocument()
   })
@@ -62,9 +63,41 @@ describe('StudentTable', () => {
       ],
     } as never)
 
-    render(<StudentTable />)
+    render(<StudentTable onSelectStudent={noop} />)
 
     expect(screen.getByText('山田太郎')).toBeInTheDocument()
     expect(screen.queryByText('削除済み花子')).not.toBeInTheDocument()
+  })
+
+  it('calls onSelectStudent with the student id when a row is clicked', () => {
+    const onSelectStudent = vi.fn()
+
+    mockedUseStudents.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [
+        {
+          student: {
+            id: '1',
+            name: '山田太郎',
+            furigana: 'ヤマダタロウ',
+            nickname: 'たろ',
+            age: 20,
+            email: 'yamada@example.com',
+            area: '東京都',
+            gender: '男性',
+            remark: '',
+            deleted: false,
+          },
+          courseDetailList: [],
+        },
+      ],
+    } as never)
+
+    render(<StudentTable onSelectStudent={onSelectStudent} />)
+
+    fireEvent.click(screen.getByText('山田太郎'))
+
+    expect(onSelectStudent).toHaveBeenCalledWith('1')
   })
 })

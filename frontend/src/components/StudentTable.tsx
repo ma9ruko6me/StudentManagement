@@ -11,7 +11,11 @@ const COLUMNS: { key: keyof Student; label: string }[] = [
   { key: 'gender', label: '性別' },
 ]
 
-export function StudentTable() {
+interface StudentTableProps {
+  onSelectStudent: (studentId: string) => void
+}
+
+export function StudentTable({ onSelectStudent }: StudentTableProps) {
   const { data: studentDetails, isLoading, isError } = useStudents()
 
   if (isLoading) {
@@ -43,7 +47,11 @@ export function StudentTable() {
         </thead>
         <tbody className="divide-y divide-border">
           {students.map((student) => (
-            <tr key={student.id} className="hover:bg-surface-hover">
+            <tr
+              key={student.id}
+              onClick={() => onSelectStudent(student.id)}
+              className="cursor-pointer hover:bg-surface-hover"
+            >
               {COLUMNS.map((column) => (
                 <td key={column.key} className="px-3 py-2.5 text-text">
                   {student[column.key]}

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { StudentTable } from './components/StudentTable'
 import { RegisterStudentModal } from './components/RegisterStudentModal'
+import { StudentDetailModal } from './components/StudentDetailModal'
 
 function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
 
   return (
     <div className="min-h-screen bg-bg text-text">
@@ -19,8 +21,9 @@ function App() {
           ＋ 新規登録
         </button>
       </div>
-      <StudentTable />
+      <StudentTable onSelectStudent={setSelectedStudentId} />
       <RegisterStudentModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} />
+      <StudentDetailModal studentId={selectedStudentId} onClose={() => setSelectedStudentId(null)} />
     </div>
   )
 }
