@@ -93,6 +93,10 @@ body {
   padding: 20px;
 }
 
+.modal-overlay[hidden] {
+  display: none;
+}
+
 .modal {
   background: #fff;
   border-radius: 8px;
@@ -149,4 +153,87 @@ body {
   color: #de350b;
   font-size: 13px;
   margin-top: 10px;
+}
+
+/* ==== 詳細モーダル ==== */
+.clickable-row {
+  cursor: pointer;
+}
+
+.detail-info {
+  margin-bottom: 12px;
+}
+
+.detail-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+
+.detail-label {
+  display: block;
+  font-size: 12px;
+  color: #5e6c84;
+}
+
+.section-title {
+  font-size: 14px;
+  margin: 20px 0 8px;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.course-table th,
+.course-table td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.course-table thead th {
+  background: #ebecf0;
+  font-weight: bold;
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.course-table select {
+  font-size: 13px;
+  padding: 4px 6px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fff;
+}
+
+.status-TEMP { background: #ffab00; }
+.status-FORMAL { background: #0065ff; }
+.status-IN_PROGRESS { background: #00875a; }
+.status-COMPLETED { background: #5e6c84; }
+.status-CANCEL { background: #de350b; }
+
+.add-course-form {
+  display: flex;
+  gap: 8px;
+}
+
+.add-course-form input {
+  flex: 1;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-family: inherit;
 }
